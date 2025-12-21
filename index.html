@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
         :root {
@@ -19,165 +20,122 @@
 
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            line-height: 1.6;
+            margin: 0; padding: 0; background-color: var(--bg-light);
+            color: var(--text-dark); line-height: 1.6; scroll-behavior: smooth;
         }
 
         header {
-            background: var(--white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000;
         }
         
         .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            max-width: 1200px; margin: 0 auto; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
+            font-size: 24px; font-weight: bold; color: var(--primary-color);
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
         }
 
+        .nav-links { display: flex; gap: 20px; }
         .nav-links a {
-            text-decoration: none;
-            color: #555;
-            margin-left: 20px;
-            font-weight: 500;
-            transition: 0.3s;
+            text-decoration: none; color: #555; font-weight: 500;
+            transition: 0.3s; padding: 5px 10px; border-radius: 5px;
+        }
+        .nav-links a:hover { color: var(--primary-color); background: #e8f5e9; }
+
+        .section { padding: 60px 20px; max-width: 1100px; margin: 0 auto; }
+        .section-title {
+            text-align: center; font-size: 32px; color: var(--primary-color);
+            margin-bottom: 40px; position: relative;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 60px; height: 4px;
+            background: var(--secondary-color); margin: 10px auto 0; border-radius: 2px;
         }
 
-        .nav-links a:hover { color: var(--primary-color); }
-
-        .section {
-            padding: 60px 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        h2 {
-            text-align: center;
-            font-size: 32px;
-            color: var(--primary-color);
-            margin-bottom: 40px;
-            position: relative;
-        }
-        
-        h2::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 4px;
-            background: var(--secondary-color);
-            margin: 10px auto 0;
-            border-radius: 2px;
-        }
-
+        /* Hero & Menu Styles */
         .hero {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            flex-wrap: wrap; 
+            display: flex; align-items: center; justify-content: space-between;
+            background: white; border-radius: 20px; padding: 40px;
+            margin-top: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); flex-wrap: wrap; 
         }
-
         .hero-text { flex: 1; min-width: 300px; padding-right: 20px; }
         .hero-text h1 { font-size: 40px; margin-bottom: 10px; color: #2c3e50; }
-        .hero-text p { font-size: 18px; color: #666; margin-bottom: 30px; }
-
+        .hero-img { flex: 1; min-width: 300px; text-align: center; }
+        .hero-img img { max-width: 100%; height: auto; }
         .btn {
-            display: inline-block;
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: 0.3s;
+            display: inline-block; background: var(--primary-color); color: white;
+            padding: 12px 30px; border-radius: 30px; text-decoration: none;
+            font-weight: bold; transition: 0.3s;
         }
         .btn:hover { background: #1b5e20; transform: translateY(-2px); }
 
-        .hero-img { flex: 1; min-width: 300px; text-align: center; }
-        .hero-img img { max-width: 100%; height: auto; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 20px; }
+        .tool-nav-card {
+            background: white; padding: 30px; border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s;
+            text-decoration: none; color: inherit; display: flex; flex-direction: column;
+            align-items: center; text-align: center; border: 1px solid #eee;
+        }
+        .tool-nav-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(46, 125, 50, 0.15); border-color: var(--primary-color); }
+        .tool-icon {
+            font-size: 40px; color: var(--primary-color); margin-bottom: 15px;
+            background: #e8f5e9; width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tool-badge { background: var(--secondary-color); color: white; font-size: 12px; padding: 2px 8px; border-radius: 10px; margin-top: 10px; }
 
         .video-section {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 40px;
-            background: #e8f5e9;
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 50px;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 40px;
+            background: #e8f5e9; border-radius: 20px; padding: 40px; margin-top: 50px;
         }
-
         .video-content { flex: 1; min-width: 300px; }
         .video-img-container { flex: 1; min-width: 300px; text-align: center; }
         .video-img-container img { max-width: 80%; }
+        .placeholder-img { width: 100%; height: 250px; background: #ddd; display: none; align-items: center; justify-content: center; border-radius: 10px; }
 
-        /* 佔位符樣式 (預設隱藏) */
-        .placeholder-img {
-            width: 100%;
-            height: 250px;
-            background-color: #ddd;
-            display: none; /* 預設不顯示，只有圖片壞掉才顯示 */
-            align-items: center;
-            justify-content: center;
-            color: #777;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        /* 互動工具樣式 */
+        /* --- 互動工具樣式 --- */
+        .tool-container { margin-top: 80px; padding-top: 40px; border-top: 1px dashed #ddd; }
         .tool-card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            width: 100%;
-            box-sizing: border-box;
+            background: white; padding: 30px; border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%;
+            box-sizing: border-box; margin-bottom: 40px;
         }
+
+        /* 公式框 */
         .equation-box {
-            background: #fff3e0;
-            border: 2px solid #ffe0b2;
-            color: #e65100;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 28px;
-            font-family: 'Times New Roman', serif;
-            margin-bottom: 25px;
-            font-weight: bold;
+            background: #fff3e0; border: 2px solid #ffe0b2; 
+            padding: 15px; border-radius: 8px; text-align: center;
+            font-family: 'Times New Roman', serif; margin-bottom: 25px;
+            display: flex; flex-direction: column; gap: 5px;
         }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            background: #fafafa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
+        .eq-static { color: #888; font-size: 18px; font-weight: normal; }
+        .eq-dynamic { color: #e65100; font-size: 32px; font-weight: bold; }
+
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; background: #fafafa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
         .control-item { background: white; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
         .control-header { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .val-display { color: var(--secondary-color); }
+        .val-display { color: var(--secondary-color); font-family: monospace; }
         input[type=range] { width: 100%; cursor: pointer; accent-color: var(--primary-color); }
-        .chart-wrapper { position: relative; height: 500px; width: 100%; }
+        .chart-wrapper { position: relative; height: 450px; width: 100%; }
+        
+        /* 觀察重點區塊 (保留並美化) */
+        .tip-box {
+            margin-top: 20px; 
+            color: #555; 
+            font-size: 15px; 
+            background: #e8f5e9; /* 淺綠底 */
+            padding: 20px; 
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color); /* 深綠邊 */
+            line-height: 1.8;
+        }
+        .tip-box b { color: var(--primary-color); }
+        .tip-box ul { margin: 10px 0 0 20px; padding: 0; }
+
         footer { background: #333; color: white; text-align: center; padding: 20px; margin-top: 60px; }
     </style>
 </head>
@@ -185,10 +143,13 @@
 
     <header>
         <div class="nav-container">
-            <a href="#" class="logo">韋中數學</a>
+           <a href="#" class="logo">
+    <img src="logo.jpg" alt="韋中老師" style="height: 45px; border-radius: 10px; margin-right: 5px;">
+    韋中數學
+</a>
             <nav class="nav-links">
-                <a href="#videos">段考詳解影片</a>
-                <a href="#interactive">互動教具</a>
+                <a href="#menu">教具目錄</a>
+                <a href="#videos">段考題講解影片</a>
             </nav>
         </div>
     </header>
@@ -197,35 +158,94 @@
         
         <div class="hero">
             <div class="hero-text">
-                <h1>讓數學變得<br><span style="color:var(--secondary-color)">看得見、摸得著</span></h1>
-                <p>歡迎來到韋中數學數位學習網。這裡結合了完整的影音教學與獨家開發的互動圖形工具，幫助你直觀理解抽象概念。</p>
-                <a href="#interactive" class="btn">立即體驗互動圖形</a>
+                <h1>讓數學概念<br><span style="color:var(--secondary-color)">動起來</span></h1>
+                <p>歡迎來到韋中數學數位學習網。這裡有我們精心製作的互動教具，幫助你將抽象的公式轉化為直觀的圖形。</p>
+                <a href="#menu" class="btn">開始探索</a>
             </div>
             <div class="hero-img">
-                <img src="hero-img.svg" alt="Math Education" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                <div class="placeholder-img">請確認檔名為 hero-img.svg</div>
+                <img src="hero-img.svg" alt="Math" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="placeholder-img">hero-img.svg</div>
+            </div>
+        </div>
+
+        <div id="menu" style="margin-top: 60px;">
+            <h2 class="section-title">互動教具圖書館</h2>
+            <div class="tools-grid">
+                <a href="pythagoras.html" target="_blank" class="tool-nav-card">
+                    <div class="tool-icon"><i class="fas fa-shapes"></i></div>
+                    <h3>勾股定理</h3>
+                    <p>直觀演示直角三角形面積關係。</p>
+                    <span class="tool-badge">新上架</span>
+                </a>
+                <a href="#quadratic-tool" class="tool-nav-card">
+                    <div class="tool-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>二次函數</h3>
+                    <p>標準式係數與拋物線圖形變化。</p>
+                </a>
+                <a href="#cubic-tool" class="tool-nav-card">
+                    <div class="tool-icon"><i class="fas fa-wave-square"></i></div>
+                    <h3>三次函數</h3>
+                    <p>探索對稱中心與三次圖形特徵。</p>
+                </a>
             </div>
         </div>
 
         <div id="videos" class="video-section">
             <div class="video-img-container">
-                 <img src="video-img.svg" alt="Video Learning" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                 <div class="placeholder-img" style="height:200px">請確認檔名為 video-img.svg</div>
+                 <img src="video-img.svg" alt="Video" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                 <div class="placeholder-img" style="height:200px">video-img.svg</div>
             </div>
             <div class="video-content">
-                <h2>段考講解影片</h2>
-                <p>新化高中的同學有福了，韋中老師精心錄製的新化段考題影音詳解，隨時隨地複習最關鍵的考點。</p>
+                <h2>段考詳解影片</h2>
+                <p>韋中老師精心錄製的新化高中段考題講解，隨時隨地都能複習段考重點。</p>
                 <br>
-                <a href="https://youtube.com/playlist?list=PLnDirJ9UNqujCfF55Xwx1oGihch_Bst7m&si=LVAFGjmyEknoxJk2" target="_blank" class="btn" style="background: #cc0000;">
-                    前往 YouTube 播放清單
-                </a>
+                <a href="https://www.youtube.com/@%E8%91%89%E5%A3%AB%E9%80%A2-b7g/playlists" target="_blank" class="btn" style="background: #cc0000;">
+    <i class="fab fa-youtube"></i> 前往 YouTube 頻道
+</a>
             </div>
         </div>
 
-        <div id="interactive" style="margin-top: 60px;">
-            <h2>三次函數圖形實驗室</h2>
+        <div id="quadratic-tool" class="tool-container">
+            <h2 class="section-title">二次函數實驗室</h2>
             <div class="tool-card">
-                <div class="equation-box" id="eq-display">y = a(x - h)³ + p(x - h) + k</div>
+                <div class="equation-box">
+                    <div class="eq-static">y = a(x - h)² + k</div>
+                    <div class="eq-dynamic" id="quad-eq-display">y = 1(x - 0)² + 0</div>
+                </div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <div class="control-header"><span>係數 a (開口)</span><span class="val-display" id="quad-val-a">1.0</span></div>
+                        <input type="range" min="-4" max="4" step="0.1" value="1" oninput="updateQuadGraph('a', this.value)">
+                    </div>
+                    <div class="control-item">
+                        <div class="control-header"><span>平移 h (左右)</span><span class="val-display" id="quad-val-h">0.0</span></div>
+                        <input type="range" min="-6" max="6" step="0.1" value="0" oninput="updateQuadGraph('h', this.value)">
+                    </div>
+                    <div class="control-item">
+                        <div class="control-header"><span>平移 k (上下)</span><span class="val-display" id="quad-val-k">0.0</span></div>
+                        <input type="range" min="-6" max="6" step="0.1" value="0" oninput="updateQuadGraph('k', this.value)">
+                    </div>
+                </div>
+                <div class="chart-wrapper"><canvas id="quadChart"></canvas></div>
+                
+                <div class="tip-box">
+                    <i class="fas fa-lightbulb" style="color:#fbc02d; margin-right:8px;"></i> <b>互動觀察重點：</b>
+                    <ul>
+                        <li><b>開口方向：</b> 當 <b>a > 0</b> 時開口向上；<b>a < 0</b> 時開口向下。</li>
+                        <li><b>頂點座標：</b> 拖動 <b>h</b> 與 <b>k</b>，觀察圖上橘色頂點 <b>V(h, k)</b> 的移動。</li>
+                        <li><b>對稱軸：</b> 虛線代表圖形的對稱軸，其方程式為 <b>x = h</b>。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="cubic-tool" class="tool-container">
+            <h2 class="section-title">三次函數實驗室</h2>
+            <div class="tool-card">
+                <div class="equation-box">
+                    <div class="eq-static">y = a(x - h)³ + p(x - h) + k</div>
+                    <div class="eq-dynamic" id="eq-display">y = 1(x - 0)³ - 3(x - 0) + 0</div>
+                </div>
                 <div class="controls-grid">
                     <div class="control-item">
                         <div class="control-header"><span>係數 a (方向)</span><span class="val-display" id="val-a">1.0</span></div>
@@ -245,19 +265,29 @@
                     </div>
                 </div>
                 <div class="chart-wrapper"><canvas id="cubicChart"></canvas></div>
-                <div style="margin-top:20px; color:#666; font-size:14px; background:#fff3e0; padding:10px; border-radius:5px;">
-                    💡 <b>觀察重點：</b> 試著調整 <b>p</b> 值由負轉正，觀察函數圖形如何從「有波浪」變成「單調遞增」。
+
+                <div class="tip-box">
+                    <i class="fas fa-lightbulb" style="color:#fbc02d; margin-right:8px;"></i> <b>互動觀察重點：</b>
+                    <ul>
+                        <li><b>對稱中心：</b> 拖動 <b>h</b> 與 <b>k</b>，觀察圖上紅色中心點 <b>C(h, k)</b> 的移動，整個圖形對此點對稱。</li>
+                        <li><b>波浪變化：</b> 調整 <b>p</b> 值。當 <b>p</b> 與 <b>a</b> 異號時會有波浪；同號時則為單調遞增/遞減。</li>
+                        <li><b>中心切線：</b> 橘色虛線為通過對稱中心的切線，其斜率就是 <b>p</b>。</li>
+                    </ul>
                 </div>
             </div>
         </div>
+
     </div>
 
     <footer><p>&copy; 2024 韋中數學 | 用科技翻轉數學教育</p></footer>
 
     <script>
+        // ----------------------------------------------------
+        // 1. 三次函數邏輯 (標示對稱中心 C)
+        // ----------------------------------------------------
         let myChart;
         let params = { a: 1.0, p: -3.0, h: 0.0, k: 0.0 };
-        window.onload = function() { initChart(); updateEquation(); };
+
         function updateGraph(key, value) {
             params[key] = parseFloat(value);
             document.getElementById(`val-${key}`).innerText = params[key];
@@ -267,6 +297,7 @@
             updateAnnotations();
             myChart.update('none'); updateEquation();
         }
+
         function generateData() {
             let curveData = [], tangentData = [];
             for (let x = -12; x <= 12; x += 0.2) {
@@ -277,18 +308,36 @@
             }
             return { curve: curveData, tangent: tangentData };
         }
+
         function updateEquation() {
             const format = (v) => v === 0 ? '' : ` ${v >= 0 ? '+' : '-'} ${Math.abs(v)}`;
             let hStr = params.h === 0 ? 'x' : `(x ${params.h > 0 ? '-' : '+'} ${Math.abs(params.h)})`;
             document.getElementById('eq-display').innerText = `y = ${params.a}${hStr}³ ${format(params.p)}${hStr} ${format(params.k)}`.replace('= +', '= ');
         }
+
         function updateAnnotations() {
             myChart.options.plugins.annotation.annotations = {
-                centerPoint: { type: 'point', xValue: params.h, yValue: params.k, backgroundColor: '#e67e22', radius: 6, borderColor: 'white', borderWidth: 2 },
+                // 對稱中心點 (C)
+                centerPoint: {
+                    type: 'point',
+                    xValue: params.h, yValue: params.k,
+                    backgroundColor: 'rgba(255, 99, 132, 1)', // 紅色
+                    radius: 6, borderColor: 'white', borderWidth: 2
+                },
+                // 對稱中心標籤
+                centerLabel: {
+                    type: 'label',
+                    xValue: params.h, yValue: params.k,
+                    content: `C(${params.h}, ${params.k})`,
+                    position: 'top', yAdjust: -10,
+                    color: 'rgba(255, 99, 132, 1)', font: { weight: 'bold' }
+                },
+                // 十字輔助線
                 vLine: { type: 'line', xMin: params.h, xMax: params.h, yMin: -20, yMax: 20, borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderDash: [5, 5] },
                 hLine: { type: 'line', yMin: params.k, yMax: params.k, xMin: -20, xMax: 20, borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderDash: [5, 5] }
             };
         }
+
         function initChart() {
             const ctx = document.getElementById('cubicChart').getContext('2d');
             const data = generateData();
@@ -299,8 +348,82 @@
             });
             updateAnnotations();
         }
+
+        // ----------------------------------------------------
+        // 2. 二次函數邏輯 (標示頂點 V)
+        // ----------------------------------------------------
+        let quadChart;
+        let quadParams = { a: 1.0, h: 0.0, k: 0.0 };
+
+        function updateQuadGraph(key, value) {
+            let val = parseFloat(value);
+            if (key === 'a' && val === 0) val = 0.1;
+            quadParams[key] = val;
+            document.getElementById(`quad-val-${key}`).innerText = quadParams[key];
+            const data = generateQuadData();
+            quadChart.data.datasets[0].data = data;
+            updateQuadAnnotations();
+            quadChart.update('none'); updateQuadEquation();
+        }
+
+        function generateQuadData() {
+            let data = [];
+            for (let x = -10; x <= 10; x += 0.1) {
+                let term = x - quadParams.h;
+                let y = quadParams.a * Math.pow(term, 2) + quadParams.k;
+                data.push({x: x, y: y});
+            }
+            return data;
+        }
+
+        function updateQuadEquation() {
+            const format = (v) => v === 0 ? '' : ` ${v > 0 ? '+' : '-'} ${Math.abs(v)}`;
+            let hStr = quadParams.h === 0 ? 'x' : `(x ${quadParams.h > 0 ? '-' : '+'} ${Math.abs(quadParams.h)})`;
+            let aVal = Math.abs(quadParams.a);
+            let aSign = quadParams.a < 0 ? '-' : '';
+            let aStr = (aVal === 1) ? aSign : quadParams.a;
+            let eq = `y = ${aStr}${hStr}² ${format(quadParams.k)}`;
+            document.getElementById('quad-eq-display').innerText = eq.replace('= +', '= ').trim();
+        }
+
+        function updateQuadAnnotations() {
+            quadChart.options.plugins.annotation.annotations = {
+                // 頂點點位 (V)
+                vertexPoint: {
+                    type: 'point',
+                    xValue: quadParams.h, yValue: quadParams.k,
+                    backgroundColor: '#e67e22', // 橘色
+                    radius: 6, borderColor: 'white', borderWidth: 2
+                },
+                // 頂點標籤
+                vertexLabel: {
+                    type: 'label',
+                    xValue: quadParams.h, yValue: quadParams.k,
+                    content: `V(${quadParams.h}, ${quadParams.k})`,
+                    position: 'top', yAdjust: -10, // 顯示在點的上方
+                    color: '#e67e22', font: { weight: 'bold' }
+                },
+                // 對稱軸
+                axisLine: {
+                    type: 'line',
+                    xMin: quadParams.h, xMax: quadParams.h, yMin: -20, yMax: 20,
+                    borderColor: 'rgba(230, 126, 34, 0.4)', borderWidth: 2, borderDash: [5, 5]
+                }
+            };
+        }
+
+        function initQuadChart() {
+            const ctx = document.getElementById('quadChart').getContext('2d');
+            const data = generateQuadData();
+            quadChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: [{ label: '二次函數', data: data, borderColor: '#2e7d32', borderWidth: 3, showLine: true, pointRadius: 0, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { min: -8, max: 8 }, y: { min: -5, max: 15 } }, plugins: { legend: { display: false }, annotation: { annotations: {} }, tooltip: { enabled: false } }, animation: false }
+            });
+            updateQuadAnnotations();
+        }
+
+        window.onload = function() { initChart(); updateEquation(); initQuadChart(); updateQuadEquation(); };
     </script>
 </body>
-
 </html>
-
