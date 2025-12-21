@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>韋中數學 - 數位互動學習網</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2e7d32; 
+            --secondary-color: #e67e22;
+            --bg-light: #f4f7f6;
+            --text-dark: #333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #555;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary-color); }
+
+        .section {
+            padding: 60px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--secondary-color);
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            flex-wrap: wrap; 
+        }
+
+        .hero-text { flex: 1; min-width: 300px; padding-right: 20px; }
+        .hero-text h1 { font-size: 40px; margin-bottom: 10px; color: #2c3e50; }
+        .hero-text p { font-size: 18px; color: #666; margin-bottom: 30px; }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover { background: #1b5e20; transform: translateY(-2px); }
+
+        .hero-img { flex: 1; min-width: 300px; text-align: center; }
+        .hero-img img { max-width: 100%; height: auto; }
+
+        .video-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 40px;
+            background: #e8f5e9;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 50px;
+        }
+
+        .video-content { flex: 1; min-width: 300px; }
+        .video-img-container { flex: 1; min-width: 300px; text-align: center; }
+        .video-img-container img { max-width: 80%; }
+
+        /* 佔位符樣式 (預設隱藏) */
+        .placeholder-img {
+            width: 100%;
+            height: 250px;
+            background-color: #ddd;
+            display: none; /* 預設不顯示，只有圖片壞掉才顯示 */
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        /* 互動工具樣式 */
+        .tool-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .equation-box {
+            background: #fff3e0;
+            border: 2px solid #ffe0b2;
+            color: #e65100;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 28px;
+            font-family: 'Times New Roman', serif;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .control-item { background: white; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
+        .control-header { display: flex; justify-content: space-between; font-weight: bold; color: #555; margin-bottom: 5px; }
+        .val-display { color: var(--secondary-color); }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--primary-color); }
+        .chart-wrapper { position: relative; height: 500px; width: 100%; }
+        footer { background: #333; color: white; text-align: center; padding: 20px; margin-top: 60px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">韋中數學</a>
+            <nav class="nav-links">
+                <a href="#videos">教學影片</a>
+                <a href="#interactive">互動教具</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="section">
+        
+        <div class="hero">
+            <div class="hero-text">
+                <h1>讓數學變得<br><span style="color:var(--secondary-color)">看得見、摸得著</span></h1>
+                <p>歡迎來到韋中數學數位學習網。這裡結合了完整的影音教學與獨家開發的互動圖形工具，幫助你直觀理解抽象概念。</p>
+                <a href="#interactive" class="btn">立即體驗互動圖形</a>
+            </div>
+            <div class="hero-img">
+                <img src="hero-img.svg" alt="Math Education" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="placeholder-img">請確認檔名為 hero-img.svg</div>
+            </div>
+        </div>
+
+        <div id="videos" class="video-section">
+            <div class="video-img-container">
+                 <img src="video-img.svg" alt="Video Learning" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                 <div class="placeholder-img" style="height:200px">請確認檔名為 video-img.svg</div>
+            </div>
+            <div class="video-content">
+                <h2>精選教學影片</h2>
+                <p>新化高中的同學有福了，韋中老師精心錄製的新化段考題影音詳解，隨時隨地複習最關鍵的考點。</p>
+                <br>
+                <a href="https://youtube.com/playlist?list=PLnDirJ9UNqujCfF55Xwx1oGihch_Bst7m&si=LVAFGjmyEknoxJk2" target="_blank" class="btn" style="background: #cc0000;">
+                    前往 YouTube 播放清單
+                </a>
+            </div>
+        </div>
+
+        <div id="interactive" style="margin-top: 60px;">
+            <h2>三次函數圖形實驗室</h2>
+            <div class="tool-card">
+                <div class="equation-box" id="eq-display">y = a(x - h)³ + p(x - h) + k</div>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <div class="control-header"><span>係數 a (方向)</span><span class="val-display" id="val-a">1.0</span></div>
+                        <input type="range" min="-3" max="3" step="0.1" value="1" oninput="updateGraph('a', this.value)">
+                    </div>
+                    <div class="control-item">
+                        <div class="control-header"><span>係數 p (波浪)</span><span class="val-display" id="val-p">-3.0</span></div>
+                        <input type="range" min="-10" max="10" step="0.5" value="-3" oninput="updateGraph('p', this.value)">
+                    </div>
+                    <div class="control-item">
+                        <div class="control-header"><span>平移 h (左右)</span><span class="val-display" id="val-h">0.0</span></div>
+                        <input type="range" min="-8" max="8" step="0.1" value="0" oninput="updateGraph('h', this.value)">
+                    </div>
+                    <div class="control-item">
+                        <div class="control-header"><span>平移 k (上下)</span><span class="val-display" id="val-k">0.0</span></div>
+                        <input type="range" min="-8" max="8" step="0.1" value="0" oninput="updateGraph('k', this.value)">
+                    </div>
+                </div>
+                <div class="chart-wrapper"><canvas id="cubicChart"></canvas></div>
+                <div style="margin-top:20px; color:#666; font-size:14px; background:#fff3e0; padding:10px; border-radius:5px;">
+                    💡 <b>觀察重點：</b> 試著調整 <b>p</b> 值由負轉正，觀察函數圖形如何從「有波浪」變成「單調遞增」。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer><p>&copy; 2024 韋中數學 | 用科技翻轉數學教育</p></footer>
+
+    <script>
+        let myChart;
+        let params = { a: 1.0, p: -3.0, h: 0.0, k: 0.0 };
+        window.onload = function() { initChart(); updateEquation(); };
+        function updateGraph(key, value) {
+            params[key] = parseFloat(value);
+            document.getElementById(`val-${key}`).innerText = params[key];
+            const data = generateData();
+            myChart.data.datasets[0].data = data.curve;
+            myChart.data.datasets[1].data = data.tangent;
+            updateAnnotations();
+            myChart.update('none'); updateEquation();
+        }
+        function generateData() {
+            let curveData = [], tangentData = [];
+            for (let x = -12; x <= 12; x += 0.2) {
+                let term = x - params.h;
+                let y = params.a * Math.pow(term, 3) + params.p * term + params.k;
+                curveData.push({x: x, y: y});
+                if(Math.abs(x - params.h) < 5) tangentData.push({x: x, y: params.p * term + params.k});
+            }
+            return { curve: curveData, tangent: tangentData };
+        }
+        function updateEquation() {
+            const format = (v) => v === 0 ? '' : ` ${v >= 0 ? '+' : '-'} ${Math.abs(v)}`;
+            let hStr = params.h === 0 ? 'x' : `(x ${params.h > 0 ? '-' : '+'} ${Math.abs(params.h)})`;
+            document.getElementById('eq-display').innerText = `y = ${params.a}${hStr}³ ${format(params.p)}${hStr} ${format(params.k)}`.replace('= +', '= ');
+        }
+        function updateAnnotations() {
+            myChart.options.plugins.annotation.annotations = {
+                centerPoint: { type: 'point', xValue: params.h, yValue: params.k, backgroundColor: '#e67e22', radius: 6, borderColor: 'white', borderWidth: 2 },
+                vLine: { type: 'line', xMin: params.h, xMax: params.h, yMin: -20, yMax: 20, borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderDash: [5, 5] },
+                hLine: { type: 'line', yMin: params.k, yMax: params.k, xMin: -20, xMax: 20, borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1, borderDash: [5, 5] }
+            };
+        }
+        function initChart() {
+            const ctx = document.getElementById('cubicChart').getContext('2d');
+            const data = generateData();
+            myChart = new Chart(ctx, {
+                type: 'scatter', 
+                data: { datasets: [{ label: '三次函數', data: data.curve, borderColor: '#2e7d32', borderWidth: 3, showLine: true, pointRadius: 0, tension: 0.4 }, { label: '中心切線', data: data.tangent, borderColor: '#e67e22', borderWidth: 2, borderDash: [5, 5], showLine: true, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { min: -10, max: 10 }, y: { min: -10, max: 10 } }, plugins: { legend: { position: 'top' }, annotation: { annotations: {} }, tooltip: { enabled: false } }, animation: false }
+            });
+            updateAnnotations();
+        }
+    </script>
+</body>
+</html>
