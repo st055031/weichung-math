@@ -137,6 +137,36 @@
         .tip-box ul { margin: 10px 0 0 20px; padding: 0; }
 
         footer { background: #333; color: white; text-align: center; padding: 20px; margin-top: 60px; }
+
+/* --- 手機版導覽列優化 --- */
+@media screen and (max-width: 600px) {
+    /* 1. 調整容器內距，爭取空間 */
+    .nav-container {
+        padding: 10px 8px;
+        flex-wrap: nowrap; /* 強制不換行 */
+    }
+
+    /* 2. 縮小 Logo 圖片與文字 */
+    .logo {
+        font-size: 15px;
+        gap: 5px;
+        flex-shrink: 0; /* 防止 Logo 被壓扁 */
+    }
+    .logo img {
+        height: 28px !important; /* 使用 !important 覆蓋 inline style */
+        margin-right: 3px !important;
+    }
+
+    /* 3. 調整連結文字大小與間距 */
+    .nav-links {
+        gap: 5px; 
+    }
+    .nav-links a {
+        font-size: 12px;
+        padding: 4px 6px;
+        white-space: nowrap; /* 關鍵：文字強制不換行 */
+    }
+}
     </style>
 </head>
 <body>
