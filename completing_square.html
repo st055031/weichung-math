@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次函數配方法演示 - 韋中數學</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2e7d32; 
+            --secondary-color: #e67e22;
+            --bg-light: #f4f7f6;
+            --text-dark: #333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0; padding: 0; background-color: var(--bg-light);
+            color: var(--text-dark); line-height: 1.6;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        header {
+            background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .logo {
+            font-size: 24px; font-weight: bold; color: var(--primary-color);
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none; color: #555; font-weight: 500;
+            transition: 0.3s; padding: 5px 10px; border-radius: 5px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px;
+            width: 100%; max-width: 900px; margin: 0 auto; box-sizing: border-box;
+        }
+
+        #canvas-wrapper {
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: white;
+            width: 100%;
+            display: flex; justify-content: center;
+        }
+
+        .controls {
+            display: flex; gap: 15px; width: 100%; justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px; font-size: 16px; cursor: pointer;
+            background-color: var(--primary-color); color: white;
+            border: none; border-radius: 30px; transition: 0.2s;
+            font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:hover { background-color: #1b5e20; transform: translateY(-2px); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none;}
+        button#resetBtn { background-color: #757575; }
+
+        .explanation {
+            background: white; padding: 20px; border-radius: 10px;
+            margin-top: 20px; width: 100%; box-sizing: border-box;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        /* 手機版導覽列優化 */
+        @media screen and (max-width: 600px) {
+            .nav-container { padding: 10px 8px; flex-wrap: nowrap; }
+            .logo { font-size: 15px; gap: 5px; flex-shrink: 0; }
+            .logo img { height: 28px !important; margin-right: 3px !important; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 12px; padding: 4px 6px; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="logo.jpg" alt="韋中老師" style="height: 45px; border-radius: 10px; margin-right: 5px;" onerror="this.style.display='none'">
+                韋中數學
+            </a>
+            <nav class="nav-links">
+                <a href="index.html#menu">回首頁</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">
+            二次函數配方法演示
+        </h2>
+        
+        <div id="canvas-wrapper"></div>
+
+        <div class="controls">
+            <button id="prevBtn" onclick="prevStep()">上一步</button>
+            <button id="nextBtn" onclick="nextStep()">下一步</button>
+            <button id="resetBtn" onclick="resetAnimation()">重新開始</button>
+        </div>
+
+        <div class="explanation">
+            <h3 style="margin-top:0"><i class="fas fa-chalkboard-teacher"></i> 教學步驟解說：</h3>
+            <div id="step-text">準備開始...</div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let totalSteps = 4;
+        
+        const explanations = [
+            "步驟 1：寫出題目。觀察二次項係數為 2。",
+            "步驟 2：將前兩項提出公因數 2。常數項 +7 留在外面。",
+            "步驟 3：配方關鍵！<br>觀察一次項係數 -6，除以 2 再平方：(-3)² = 9。<br>括號內補上 <b style='color:blue'>+9</b>，括號外要扣掉 2×9 = 18 以維持平衡。",
+            "步驟 4：整理算式。<br>括號內寫成完全平方式，外面合併常數項。",
+            "步驟 5：寫出頂點座標 V(h, k)。"
+        ];
+
+        function setup() {
+            let w = min(windowWidth - 40, 600);
+            let h = 450; // 增加高度以容納更寬的行距
+            let canvas = createCanvas(w, h);
+            canvas.parent('canvas-wrapper');
+            textFont('Noto Sans TC', 24); // 統一字體大小
+            updateButtons();
+        }
+
+        function windowResized() {
+            let w = min(windowWidth - 40, 600);
+            resizeCanvas(w, 450);
+        }
+
+        function draw() {
+            background(255);
+            
+            // 基礎設定
+            fill(50); stroke(0); strokeWeight(0.5); textSize(24);
+            
+            // 定義起始位置與行高
+            let startX = 20; 
+            let startY = 60;
+            let lh = 80; // 增加行高，避免箭頭撞到字
+
+            // --- 第一行：題目 ---
+            if (currentStep >= 0) {
+                textAlign(LEFT, BASELINE);
+                text("y = 2x² - 12x + 7", startX, startY);
+            }
+
+            // --- 計算第二行的關鍵座標 (確保不會重疊) ---
+            // 拆解字串
+            let str_eq = "= 2(";      // 開頭
+            let str_quad = "x² - 6x"; // 二次項與一次項
+            let str_close = ") + 7";  // 結尾
+            
+            // 計算各段寬度
+            let w_eq = textWidth(str_eq);
+            let w_quad = textWidth(str_quad);
+            let gap = 70; // 留給 +9 的固定寬度，保證夠寬
+            let w_close = textWidth(str_close);
+
+            // 定義各區塊的 X 座標
+            let x_eq = startX;
+            let x_quad = x_eq + w_eq;
+            let x_gap_start = x_quad + w_quad; // 空位的起點
+            let x_close = x_gap_start + gap;   // 空位的終點，也是後半段的起點
+
+            // --- 第二行：提公因數 ---
+            if (currentStep >= 1) {
+                // 畫出黑色部分
+                text(str_eq, x_eq, startY + lh);
+                text(str_quad, x_quad, startY + lh);
+                text(str_close, x_close, startY + lh);
+            }
+
+            // --- 第三行：配方補數 (最複雜的一步) ---
+            if (currentStep >= 2) {
+                // 1. 填入 +9 (藍色) -> 絕對置中於 gap
+                fill(0, 0, 200);
+                let str_nine = "+ 9";
+                let w_nine = textWidth(str_nine);
+                let x_nine = x_gap_start + (gap - w_nine) / 2; // 數學置中
+                text(str_nine, x_nine, startY + lh);
+
+                // 2. 顯示 -18 (藍色) -> 緊接在最後面
+                let x_minus18 = x_close + w_close + 15;
+                text("- 18", x_minus18, startY + lh);
+
+                // --- 畫紅色箭頭 (除以2再平方) ---
+                // 起點：-6 的大約位置 (在 quad 字串的中後段)
+                // 終點：+9 的正下方
+                let x_arrow_start_red = x_quad + textWidth("x² - 6") - 10; 
+                let x_arrow_end_red = x_nine + w_nine / 2;
+                let y_base = startY + lh + 5;
+
+                drawCurvedArrow(x_arrow_start_red, y_base + 5, x_arrow_end_red, y_base + 5, "red");
+
+                // --- 畫綠色箭頭 (平衡) ---
+                // 起點：係數 2 的位置 (在 eq 字串的尾端附近)
+                // 終點：-18 的正上方
+                let x_arrow_start_green = x_eq + textWidth("= 2") - 10;
+                let x_arrow_end_green = x_minus18 + textWidth("- 18") / 2;
+                let y_top = startY + lh - 25; // 文字上方
+
+                drawOverArrow(x_arrow_start_green, y_top, x_arrow_end_green, y_top);
+            }
+
+            // --- 第四行：整理結果 ---
+            if (currentStep >= 3) {
+                fill(50); 
+                text("= 2(x - 3)² - 11", startX, startY + lh * 2 + 20); // 額外加一點距離避開紅字
+                
+                // 輔助文字 (-6 ÷ 2)
+                push();
+                textSize(16);
+                fill(150);
+                text("(-6 ÷ 2)", startX + 80, startY + lh * 2 + 50);
+                pop();
+            }
+
+            // --- 第五行：頂點座標 ---
+            if (currentStep >= 4) {
+                fill(230, 126, 34); // 橘色
+                textSize(32);
+                textStyle(BOLD);
+                text("V ( 3 , -11 )", startX, startY + lh * 3 + 30);
+                textStyle(NORMAL);
+            }
+        }
+
+        // 紅色下彎箭頭繪製函數
+        function drawCurvedArrow(x1, y1, x2, y2, colorType) {
+            push();
+            noFill();
+            stroke(220, 50, 50); // 紅色
+            strokeWeight(2);
+            
+            // 畫折線路徑 (直角轉彎比較整齊)
+            beginShape();
+            vertex(x1, y1);
+            vertex(x1, y1 + 25);
+            vertex(x2, y1 + 25);
+            vertex(x2, y2 + 10); // 指向目標下方一點點
+            endShape();
+
+            // 畫箭頭頭部
+            translate(x2, y2 + 5);
+            fill(220, 50, 50); noStroke();
+            triangle(-5, 10, 5, 10, 0, 0); // 向上指
+            
+            // 文字說明
+            textSize(14);
+            textAlign(CENTER);
+            text("除以2再平方", (x1+x2)/2, 45); // 相對座標
+            text("(-3)² = 9", (x1+x2)/2, 65);
+            pop();
+        }
+
+        // 綠色上跨箭頭繪製函數
+        function drawOverArrow(x1, y1, x2, y2) {
+            push();
+            noFill();
+            stroke(46, 125, 50); // 綠色
+            strokeWeight(2);
+
+            // 貝茲曲線畫弧線
+            bezier(x1, y1, x1, y1 - 40, x2, y2 - 40, x2, y2);
+
+            // 箭頭頭部
+            translate(x2, y2);
+            rotate(PI/2); // 調整角度
+            fill(46, 125, 50); noStroke();
+            triangle(-5, -10, 5, -10, 0, 0); 
+            
+            // 文字說明
+            rotate(-PI/2); // 轉回來寫字
+            textSize(14);
+            textAlign(CENTER);
+            text("平衡：2 × 9 = 18", (x1+x2)/2, -30); // 顯示在弧線上方
+            pop();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) { currentStep++; updateButtons(); }
+        }
+        function prevStep() {
+            if (currentStep > 0) { currentStep--; updateButtons(); }
+        }
+        function resetAnimation() {
+            currentStep = 0; updateButtons();
+        }
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = (currentStep === 0);
+            document.getElementById('nextBtn').disabled = (currentStep === totalSteps);
+            document.getElementById('step-text').innerHTML = explanations[currentStep];
+        }
+    </script>
+</body>
+</html>
