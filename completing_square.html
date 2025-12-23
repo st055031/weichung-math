@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二次函數配方法演示 - 韋中數學</title>
+    <title>自訂係數配方法 (垂直分數版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -21,301 +21,378 @@
             font-family: 'Noto Sans TC', sans-serif;
             margin: 0; padding: 0; background-color: var(--bg-light);
             color: var(--text-dark); line-height: 1.6;
-            display: flex; flex-direction: column; min-height: 100vh;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        header {
-            background: var(--white); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 1000;
+        .main-layout { display: flex; flex: 1; height: 100%; }
+
+        .canvas-area {
+            flex: 2; background: white;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
+            padding: 20px; border-right: 1px solid #ddd;
+            overflow-y: auto;
         }
+
+        .controls-area {
+            flex: 1; background: #fafafa; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
+            overflow-y: auto; min-width: 320px;
+        }
+
+        .fraction-group {
+            display: flex; align-items: center; gap: 10px;
+            background: white; padding: 15px; border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .coeff-label { font-weight: bold; font-size: 1.2em; width: 30px; }
         
-        .nav-container {
-            max-width: 1200px; margin: 0 auto; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
+        .fraction-input {
+            display: flex; flex-direction: column; align-items: center; width: 60px;
         }
-
-        .logo {
-            font-size: 24px; font-weight: bold; color: var(--primary-color);
-            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        .fraction-input input {
+            width: 100%; text-align: center; border: 1px solid #ccc;
+            border-radius: 4px; padding: 4px; font-size: 16px;
         }
+        .fraction-line { width: 100%; height: 2px; background: #333; margin: 4px 0; }
 
-        .nav-links { display: flex; gap: 20px; }
-        .nav-links a {
-            text-decoration: none; color: #555; font-weight: 500;
-            transition: 0.3s; padding: 5px 10px; border-radius: 5px;
-        }
-
-        .container {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 20px;
-            width: 100%; max-width: 900px; margin: 0 auto; box-sizing: border-box;
-        }
-
-        #canvas-wrapper {
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            background: white;
-            width: 100%;
-            display: flex; justify-content: center;
-        }
-
-        .controls {
-            display: flex; gap: 15px; width: 100%; justify-content: center;
-            flex-wrap: wrap;
-        }
-
+        .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         button {
-            padding: 12px 30px; font-size: 16px; cursor: pointer;
+            padding: 10px 20px; font-size: 16px; cursor: pointer;
             background-color: var(--primary-color); color: white;
-            border: none; border-radius: 30px; transition: 0.2s;
-            font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none; border-radius: 5px; font-weight: bold;
         }
-        button:hover { background-color: #1b5e20; transform: translateY(-2px); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none;}
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
         button#resetBtn { background-color: #757575; }
 
-        .explanation {
-            background: white; padding: 20px; border-radius: 10px;
-            margin-top: 20px; width: 100%; box-sizing: border-box;
-            border-left: 5px solid var(--secondary-color);
+        .explanation-box {
+            margin-top: auto; padding: 15px; background: #e8f5e9;
+            border-radius: 8px; border-left: 4px solid var(--primary-color);
+            font-size: 0.9em; width: 90%;
         }
 
-        /* 手機版導覽列優化 */
-        @media screen and (max-width: 600px) {
-            .nav-container { padding: 10px 8px; flex-wrap: nowrap; }
-            .logo { font-size: 15px; gap: 5px; flex-shrink: 0; }
-            .logo img { height: 28px !important; margin-right: 3px !important; }
-            .nav-links { gap: 5px; }
-            .nav-links a { font-size: 12px; padding: 4px 6px; white-space: nowrap; }
+        #canvas-wrapper { width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
+
+        @media (max-width: 768px) {
+            .main-layout { flex-direction: column-reverse; }
+            .canvas-area { flex: 1; border-right: none; border-top: 1px solid #ddd; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="nav-container">
-            <a href="index.html" class="logo">
-                <img src="logo.jpg" alt="韋中老師" style="height: 45px; border-radius: 10px; margin-right: 5px;" onerror="this.style.display='none'">
-                韋中數學
-            </a>
-            <nav class="nav-links">
-                <a href="index.html#menu">回首頁</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container">
-        <h2 style="color: var(--primary-color); text-align: center; margin-bottom: 20px;">
-            二次函數配方法演示
-        </h2>
-        
-        <div id="canvas-wrapper"></div>
-
-        <div class="controls">
-            <button id="prevBtn" onclick="prevStep()">上一步</button>
-            <button id="nextBtn" onclick="nextStep()">下一步</button>
-            <button id="resetBtn" onclick="resetAnimation()">重新開始</button>
+    <div class="main-layout">
+        <div class="canvas-area">
+            <h2 style="color: var(--primary-color); margin-bottom: 10px;">配方法動態演示 (垂直分數)</h2>
+            <div id="canvas-wrapper"></div>
+            <div class="explanation-box">
+                <b>當前步驟：</b> <span id="step-desc">準備開始...</span>
+            </div>
         </div>
 
-        <div class="explanation">
-            <h3 style="margin-top:0"><i class="fas fa-chalkboard-teacher"></i> 教學步驟解說：</h3>
-            <div id="step-text">準備開始...</div>
+        <div class="controls-area">
+            <h3 style="margin-top:0"><i class="fas fa-sliders-h"></i> 設定係數 (分數)</h3>
+            
+            <div class="fraction-group">
+                <div class="coeff-label">a =</div>
+                <div class="fraction-input">
+                    <input type="number" id="a_num" value="2" onchange="updateMath()">
+                    <div class="fraction-line"></div>
+                    <input type="number" id="a_den" value="1" onchange="updateMath()">
+                </div>
+            </div>
+
+            <div class="fraction-group">
+                <div class="coeff-label">b =</div>
+                <div class="fraction-input">
+                    <input type="number" id="b_num" value="-3" onchange="updateMath()">
+                    <div class="fraction-line"></div>
+                    <input type="number" id="b_den" value="1" onchange="updateMath()">
+                </div>
+            </div>
+
+            <div class="fraction-group">
+                <div class="coeff-label">c =</div>
+                <div class="fraction-input">
+                    <input type="number" id="c_num" value="1" onchange="updateMath()">
+                    <div class="fraction-line"></div>
+                    <input type="number" id="c_den" value="1" onchange="updateMath()">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button id="prevBtn" onclick="prevStep()">上一步</button>
+                <button id="nextBtn" onclick="nextStep()">下一步</button>
+            </div>
+            <div class="btn-group">
+                <button id="resetBtn" onclick="resetAnimation()" style="width:100%">重置步驟</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let currentStep = 0;
+        // 分數類別
+        class Fraction {
+            constructor(n, d) {
+                if (d === 0) { d = 1; }
+                if (d < 0) { n = -n; d = -d; }
+                this.n = parseInt(n);
+                this.d = parseInt(d);
+                this.simplify();
+            }
+            simplify() {
+                const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+                let common = gcd(this.n, this.d);
+                this.n /= common;
+                this.d /= common;
+            }
+            val() { return this.n / this.d; }
+            add(f) { return new Fraction(this.n * f.d + f.n * this.d, this.d * f.d); }
+            sub(f) { return new Fraction(this.n * f.d - f.n * this.d, this.d * f.d); }
+            mul(f) { return new Fraction(this.n * f.n, this.d * f.d); }
+            div(f) { return new Fraction(this.n * f.d, this.d * f.n); }
+            sq()   { return new Fraction(this.n * this.n, this.d * this.d); }
+            abs()  { return new Fraction(Math.abs(this.n), this.d); }
+        }
+
+        let step = 0;
         let totalSteps = 4;
-        
-        const explanations = [
-            "步驟 1：寫出題目。觀察二次項係數為 2。",
-            "步驟 2：將前兩項提出公因數 2。常數項 +7 留在外面。",
-            "步驟 3：配方關鍵！<br>觀察一次項係數 -6，除以 2 再平方：(-3)² = 9。<br>括號內補上 <b style='color:blue'>+9</b>，括號外要扣掉 2×9 = 18 以維持平衡。",
-            "步驟 4：整理算式。<br>括號內寫成完全平方式，外面合併常數項。",
-            "步驟 5：寫出頂點座標 V(h, k)。"
-        ];
+        let A, B, C, B_div_A, Half_B, Half_B_Sq, Balance, Final_K;
 
         function setup() {
-            let w = min(windowWidth - 40, 600);
-            let h = 450; // 增加高度以容納更寬的行距
-            let canvas = createCanvas(w, h);
+            let canvas = createCanvas(600, 480);
             canvas.parent('canvas-wrapper');
-            textFont('Noto Sans TC', 24); // 統一字體大小
-            updateButtons();
+            textFont('Noto Sans TC');
+            updateMath();
         }
 
         function windowResized() {
-            let w = min(windowWidth - 40, 600);
-            resizeCanvas(w, 450);
+            let w = document.querySelector('.canvas-area').clientWidth - 40;
+            resizeCanvas(min(w, 700), 480);
+        }
+
+        function updateMath() {
+            let getVal = (id) => document.getElementById(id).value;
+            A = new Fraction(getVal('a_num'), getVal('a_den'));
+            B = new Fraction(getVal('b_num'), getVal('b_den'));
+            C = new Fraction(getVal('c_num'), getVal('c_den'));
+
+            B_div_A = B.div(A);
+            Half_B = B_div_A.div(new Fraction(2, 1));
+            Half_B_Sq = Half_B.sq();
+            Balance = A.mul(Half_B_Sq);
+            Final_K = C.sub(Balance);
+            redraw();
+        }
+
+        // --- 核心：繪製垂直分數的函式 ---
+        // 回傳：物件佔用的寬度，並將繪製中心點透過 return 物件傳回 (方便畫箭頭)
+        function drawVerticalFraction(f, x, y, options = {}) {
+            let { showSign = false, color = 0, fontSize = 24 } = options;
+            
+            fill(color); stroke(0); strokeWeight(0); 
+            textSize(fontSize);
+            
+            let val = f.val();
+            let absN = Math.abs(f.n);
+            let absD = Math.abs(f.d);
+            
+            // 處理正負號
+            let signStr = "";
+            if (val < 0) signStr = "- ";
+            else if (showSign && val >= 0) signStr = "+ ";
+            
+            let signW = textWidth(signStr);
+            text(signStr, x, y); // 畫符號
+            
+            let currentX = x + signW;
+            let widthUsed = signW;
+            let centerX = currentX; // 預設中心
+
+            // 判斷是整數還是分數
+            if (f.d === 1) {
+                // 整數模式
+                text(absN, currentX, y);
+                let numW = textWidth(absN.toString());
+                widthUsed += numW;
+                centerX = currentX + numW / 2;
+            } else {
+                // 分數模式 (垂直)
+                textSize(fontSize * 0.85); // 分數數字稍微縮小
+                let nStr = absN.toString();
+                let dStr = absD.toString();
+                let wN = textWidth(nStr);
+                let wD = textWidth(dStr);
+                let maxW = Math.max(wN, wD);
+                let padding = 4;
+                let barW = maxW + padding;
+
+                // 畫分數線
+                let midY = y - fontSize * 0.4; // 調整到算式中間高度
+                stroke(color === 0 ? 0 : color); strokeWeight(1.5);
+                line(currentX, midY, currentX + barW, midY);
+
+                // 畫分子與分母
+                noStroke();
+                textAlign(CENTER, BOTTOM);
+                text(nStr, currentX + barW/2, midY - 2);
+                textAlign(CENTER, TOP);
+                text(dStr, currentX + barW/2, midY + 4);
+
+                // 復原對齊
+                textAlign(LEFT, BASELINE);
+                textSize(fontSize); // 復原字體大小
+
+                widthUsed += barW;
+                centerX = currentX + barW / 2;
+            }
+
+            return { width: widthUsed, centerX: centerX };
         }
 
         function draw() {
             background(255);
-            
-            // 基礎設定
             fill(50); stroke(0); strokeWeight(0.5); textSize(24);
             
-            // 定義起始位置與行高
-            let startX = 20; 
-            let startY = 60;
-            let lh = 80; // 增加行高，避免箭頭撞到字
+            let startX = 20;
+            let startY = 70; // 增加上方留白給垂直分數
+            let lh = 100;    // 增加行距，避免垂直分數打架
 
             // --- 第一行：題目 ---
-            if (currentStep >= 0) {
-                textAlign(LEFT, BASELINE);
-                text("y = 2x² - 12x + 7", startX, startY);
-            }
-
-            // --- 計算第二行的關鍵座標 (確保不會重疊) ---
-            // 拆解字串
-            let str_eq = "= 2(";      // 開頭
-            let str_quad = "x² - 6x"; // 二次項與一次項
-            let str_close = ") + 7";  // 結尾
+            let cx = startX;
+            text("y = ", cx, startY); cx += textWidth("y = ");
             
-            // 計算各段寬度
-            let w_eq = textWidth(str_eq);
-            let w_quad = textWidth(str_quad);
-            let gap = 70; // 留給 +9 的固定寬度，保證夠寬
-            let w_close = textWidth(str_close);
-
-            // 定義各區塊的 X 座標
-            let x_eq = startX;
-            let x_quad = x_eq + w_eq;
-            let x_gap_start = x_quad + w_quad; // 空位的起點
-            let x_close = x_gap_start + gap;   // 空位的終點，也是後半段的起點
+            if (A.val() !== 1) { // 係數為1不顯示
+                if (A.val() === -1) { text("-", cx, startY); cx += textWidth("-"); }
+                else cx += drawVerticalFraction(A, cx, startY).width;
+            }
+            
+            text("x² ", cx, startY); cx += textWidth("x² ");
+            cx += drawVerticalFraction(B, cx, startY, {showSign: true}).width;
+            text("x ", cx, startY); cx += textWidth("x ");
+            cx += drawVerticalFraction(C, cx, startY, {showSign: true}).width;
 
             // --- 第二行：提公因數 ---
-            if (currentStep >= 1) {
-                // 畫出黑色部分
-                text(str_eq, x_eq, startY + lh);
-                text(str_quad, x_quad, startY + lh);
-                text(str_close, x_close, startY + lh);
-            }
-
-            // --- 第三行：配方補數 (最複雜的一步) ---
-            if (currentStep >= 2) {
-                // 1. 填入 +9 (藍色) -> 絕對置中於 gap
-                fill(0, 0, 200);
-                let str_nine = "+ 9";
-                let w_nine = textWidth(str_nine);
-                let x_nine = x_gap_start + (gap - w_nine) / 2; // 數學置中
-                text(str_nine, x_nine, startY + lh);
-
-                // 2. 顯示 -18 (藍色) -> 緊接在最後面
-                let x_minus18 = x_close + w_close + 15;
-                text("- 18", x_minus18, startY + lh);
-
-                // --- 畫紅色箭頭 (除以2再平方) ---
-                // 起點：-6 的大約位置 (在 quad 字串的中後段)
-                // 終點：+9 的正下方
-                let x_arrow_start_red = x_quad + textWidth("x² - 6") - 10; 
-                let x_arrow_end_red = x_nine + w_nine / 2;
-                let y_base = startY + lh + 5;
-
-                drawCurvedArrow(x_arrow_start_red, y_base + 5, x_arrow_end_red, y_base + 5, "red");
-
-                // --- 畫綠色箭頭 (平衡) ---
-                // 起點：係數 2 的位置 (在 eq 字串的尾端附近)
-                // 終點：-18 的正上方
-                let x_arrow_start_green = x_eq + textWidth("= 2") - 10;
-                let x_arrow_end_green = x_minus18 + textWidth("- 18") / 2;
-                let y_top = startY + lh - 25; // 文字上方
-
-                drawOverArrow(x_arrow_start_green, y_top, x_arrow_end_green, y_top);
-            }
-
-            // --- 第四行：整理結果 ---
-            if (currentStep >= 3) {
-                fill(50); 
-                text("= 2(x - 3)² - 11", startX, startY + lh * 2 + 20); // 額外加一點距離避開紅字
+            if (step >= 1) {
+                let y2 = startY + lh;
+                cx = startX;
                 
-                // 輔助文字 (-6 ÷ 2)
-                push();
-                textSize(16);
-                fill(150);
-                text("(-6 ÷ 2)", startX + 80, startY + lh * 2 + 50);
-                pop();
+                text("= ", cx, y2); cx += textWidth("= ");
+                // 箭頭起點 A
+                let posA = drawVerticalFraction(A, cx, y2);
+                cx += posA.width;
+                let arrowStartA = posA.centerX; 
+
+                text("(x² ", cx, y2); cx += textWidth("(x² ");
+                
+                // 一次項係數 B/A (箭頭起點 B_div_A)
+                let posBdivA = drawVerticalFraction(B_div_A, cx, y2, {showSign: true});
+                cx += posBdivA.width;
+                let arrowStartB = posBdivA.centerX;
+
+                text("x", cx, y2); cx += textWidth("x");
+
+                let gapStart = cx; // 紀錄空位起點
+                let gapW = 80;     // 預留空位
+                if (step >= 2) gapW = 100; // 有填數字時寬一點
+                
+                cx += gapW; 
+                text(") ", cx, y2); cx += textWidth(") ");
+                cx += drawVerticalFraction(C, cx, y2, {showSign: true}).width;
+                let endOfLine2 = cx;
+
+                // --- 第三行：配方補數與平衡 ---
+                if (step >= 2) {
+                    // 1. 填入補數 (藍色)
+                    // 計算置中位置
+                    let tempCX = gapStart + 10;
+                    // 先計算寬度但不畫，為了置中 (這裡簡化，直接畫在 gapStart 偏移處)
+                    let posSq = drawVerticalFraction(Half_B_Sq, gapStart + 10, y2, {showSign: true, color: 'blue'});
+                    let arrowEndSq = posSq.centerX;
+
+                    // 2. 填入平衡項 (藍色)
+                    // 因為是扣掉 (A * 補數)，所以符號要變號
+                    // 若 Balance 正 -> 減去 (顯示 - ...)
+                    // 若 Balance 負 -> 減去負的 (顯示 + ...)
+                    let balanceColor = 'blue';
+                    let balanceSignStr = (Balance.val() >= 0) ? "- " : "+ ";
+                    text(balanceSignStr, endOfLine2 + 10, y2);
+                    let posBal = drawVerticalFraction(Balance.abs(), endOfLine2 + 10 + textWidth(balanceSignStr), y2, {color: 'blue'});
+                    let arrowEndBal = posBal.centerX;
+
+                    // 3. 紅色箭頭 (除以2再平方)
+                    drawCurvedArrow(arrowStartB, y2 + 15, arrowEndSq, y2 + 15, "red");
+
+                    // 4. 綠色箭頭 (平衡)
+                    drawOverArrow(arrowStartA, y2 - 35, arrowEndBal, y2 - 35);
+                }
             }
 
-            // --- 第五行：頂點座標 ---
-            if (currentStep >= 4) {
-                fill(230, 126, 34); // 橘色
-                textSize(32);
-                textStyle(BOLD);
-                text("V ( 3 , -11 )", startX, startY + lh * 3 + 30);
+            // --- 第四行：整理 ---
+            if (step >= 3) {
+                let y3 = startY + lh * 2;
+                cx = startX;
+                text("= ", cx, y3); cx += textWidth("= ");
+                cx += drawVerticalFraction(A, cx, y3).width;
+                
+                text("(x ", cx, y3); cx += textWidth("(x ");
+                
+                // 顯示一半的數 (Half_B)
+                cx += drawVerticalFraction(Half_B, cx, y3, {showSign: true}).width;
+                text(")² ", cx, y3); cx += textWidth(")² ");
+                
+                // 顯示常數項 K
+                cx += drawVerticalFraction(Final_K, cx, y3, {showSign: true}).width;
+            }
+
+            // --- 第五行：頂點 ---
+            if (step >= 4) {
+                let y4 = startY + lh * 3;
+                cx = startX;
+                fill(230, 126, 34); textStyle(BOLD); textSize(30);
+                text("V ( ", cx, y4); cx += textWidth("V ( ");
+                
+                // 頂點 X = -Half_B
+                let vx = new Fraction(-Half_B.n, Half_B.d);
+                // 這裡要用黑色或橘色畫分數？既然是重點用橘色
+                // 但 drawVerticalFraction 預設黑色，我們傳入 color
+                cx += drawVerticalFraction(vx, cx, y4, {color: '#e67e22', fontSize: 30}).width;
+                
+                text(" , ", cx, y4); cx += textWidth(" , ");
+                cx += drawVerticalFraction(Final_K, cx, y4, {color: '#e67e22', fontSize: 30}).width;
+                text(" )", cx, y4);
                 textStyle(NORMAL);
             }
         }
 
-        // 紅色下彎箭頭繪製函數
-        function drawCurvedArrow(x1, y1, x2, y2, colorType) {
-            push();
-            noFill();
-            stroke(220, 50, 50); // 紅色
-            strokeWeight(2);
-            
-            // 畫折線路徑 (直角轉彎比較整齊)
-            beginShape();
-            vertex(x1, y1);
-            vertex(x1, y1 + 25);
-            vertex(x2, y1 + 25);
-            vertex(x2, y2 + 10); // 指向目標下方一點點
-            endShape();
-
-            // 畫箭頭頭部
-            translate(x2, y2 + 5);
-            fill(220, 50, 50); noStroke();
-            triangle(-5, 10, 5, 10, 0, 0); // 向上指
-            
-            // 文字說明
-            textSize(14);
-            textAlign(CENTER);
-            text("除以2再平方", (x1+x2)/2, 45); // 相對座標
-            text("(-3)² = 9", (x1+x2)/2, 65);
+        // 繪圖輔助
+        function drawCurvedArrow(x1, y1, x2, y2, color) {
+            push(); noFill(); stroke(color); strokeWeight(2);
+            beginShape(); vertex(x1, y1); vertex(x1, y1 + 35); vertex(x2, y1 + 35); vertex(x2, y2 + 15); endShape();
+            translate(x2, y2 + 10); fill(color); noStroke(); triangle(-5, 8, 5, 8, 0, -2); // 朝上
             pop();
+            // 文字
+            noStroke(); fill(color); textSize(14); textAlign(CENTER);
+            text("除以2再平方", (x1+x2)/2, y1 + 55);
         }
 
-        // 綠色上跨箭頭繪製函數
         function drawOverArrow(x1, y1, x2, y2) {
-            push();
-            noFill();
-            stroke(46, 125, 50); // 綠色
-            strokeWeight(2);
-
-            // 貝茲曲線畫弧線
-            bezier(x1, y1, x1, y1 - 40, x2, y2 - 40, x2, y2);
-
-            // 箭頭頭部
-            translate(x2, y2);
-            rotate(PI/2); // 調整角度
-            fill(46, 125, 50); noStroke();
-            triangle(-5, -10, 5, -10, 0, 0); 
-            
-            // 文字說明
-            rotate(-PI/2); // 轉回來寫字
-            textSize(14);
-            textAlign(CENTER);
-            text("平衡：2 × 9 = 18", (x1+x2)/2, -30); // 顯示在弧線上方
+            push(); noFill(); stroke(46, 125, 50); strokeWeight(2);
+            let h = 50; // 拱高
+            bezier(x1, y1, x1, y1 - h, x2, y2 - h, x2, y2);
+            translate(x2, y2); rotate(PI/2); fill(46, 125, 50); noStroke(); triangle(-5, -10, 5, -10, 0, 0);
             pop();
         }
 
-        function nextStep() {
-            if (currentStep < totalSteps) { currentStep++; updateButtons(); }
-        }
-        function prevStep() {
-            if (currentStep > 0) { currentStep--; updateButtons(); }
-        }
-        function resetAnimation() {
-            currentStep = 0; updateButtons();
-        }
-        function updateButtons() {
-            document.getElementById('prevBtn').disabled = (currentStep === 0);
-            document.getElementById('nextBtn').disabled = (currentStep === totalSteps);
-            document.getElementById('step-text').innerHTML = explanations[currentStep];
+        function nextStep() { if(step < totalSteps) { step++; updateBtn(); } }
+        function prevStep() { if(step > 0) { step--; updateBtn(); } }
+        function resetAnimation() { step = 0; updateBtn(); }
+        function updateBtn() {
+            document.getElementById('prevBtn').disabled = (step === 0);
+            document.getElementById('nextBtn').disabled = (step === totalSteps);
+            let steps = ["1. 題目展示", "2. 提出係數 a", "3. 配方補項與平衡", "4. 整理成完全平方式", "5. 寫出頂點座標"];
+            document.getElementById('step-desc').innerText = steps[step];
+            redraw();
         }
     </script>
 </body>
