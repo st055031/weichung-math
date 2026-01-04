@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誰是韋中 - 韋中數學</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF9800; 
+            --bg-warm: #FFF8E1;
+            --text-dark: #333;
+        }
+        body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-warm); color: var(--text-dark); margin: 0; }
+
+        /* 頂部導航 */
+        .navbar { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { text-decoration: none; color: #5D4037; font-weight: bold; }
+
+        /* 個人簡介區塊 */
+        .profile-section {
+            max-width: 900px; margin: 40px auto; padding: 20px;
+            background: white; border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex; gap: 40px; align-items: center;
+        }
+        .profile-img {
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--primary);
+            flex-shrink: 0;
+        }
+        .profile-content h1 { color: #E65100; margin-bottom: 10px; }
+        .tag { background: #FFCC80; padding: 5px 10px; border-radius: 5px; font-size: 0.9em; margin-right: 5px; display: inline-block; margin-bottom: 10px; }
+        .bio-text { line-height: 1.8; color: #555; }
+
+        /* 經歷時間軸樣式 */
+        .timeline { max-width: 800px; margin: 50px auto; padding: 20px; }
+        .timeline-item {
+            border-left: 3px solid var(--primary);
+            padding-left: 20px; margin-bottom: 30px; position: relative;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -9px; top: 0;
+            width: 15px; height: 15px; background: var(--primary); border-radius: 50%;
+        }
+        .year { font-weight: bold; color: #E65100; }
+        .event-title { font-weight: bold; font-size: 1.1em; margin: 5px 0; }
+
+        @media (max-width: 768px) {
+            .profile-section { flex-direction: column; text-align: center; }
+            .profile-img { width: 200px; height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html"><i class="fas fa-arrow-left"></i> 回首頁</a>
+    </nav>
+
+    <div class="profile-section">
+        <img src="my_photo.jpg" alt="韋中老師" class="profile-img">
+        <div class="profile-content">
+            <h1>韋中 老師</h1>
+            <div>
+                <span class="tag">數理資優班名師</span>
+                <span class="tag">線上補習網講師</span>
+                <span class="tag">漢華出版社校用卷作者</span>
+                <span class="tag">國三總複習參考書作者</span>
+                <span class="tag">榜單製造機</span>
+                <span class="tag">暖男風格</span>
+            </div>
+            <p class="bio-text">
+                教學理念：「數學不只是公式，而是一種思考方式。」<br>
+                致力於用最淺顯易懂的語言，解析最複雜的幾何與代數。希望能讓每個害怕數學的孩子，在這裡找回自信與笑容。
+            </p>
+        </div>
+    </div>
+
+    <div class="timeline">
+        <h2 style="text-align:center; color:#5D4037;">生涯歷程</h2>
+        
+        <div class="timeline-item">
+            <div class="year">2024 - 至今</div>
+            <div class="event-title">新化志成 首席數學老師 </div>
+            <p>致力於數位教材開發與差異化教學研究。</p>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="year">2013 - 2023</div>
+            <div class="event-title">金牌補習班 數學科講師</div>
+            <p>帶領團隊編寫教材，學生升學率屢創新高。</p>
+        </div>
+
+        <div class="timeline-item">
+            <div class="year">2010- 2013</div>
+            <div class="event-title">國立成功大學 碩士</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="year">2006 - 2010</div>
+            <div class="event-title">國立中興大學 學士</div>  
+        </div>
+
+        <div class="timeline-item">
+            <div class="year">2004 - 2006</div>
+            <div class="event-title">國立高雄中學 </div>
+            <p>高屏地區第一志願，PR99進入雄中。</p>
+        </div>
+
+
+
+
+
+    </div>
+</body>
+</html>
