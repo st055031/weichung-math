@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>長方體最短路徑 (手機優化版_V14)</title>
+    <title>長方體最短路徑 (手機優化版_V15)</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -129,16 +129,21 @@
         .f-bottom { width: var(--w); height: var(--d); transform: translate3d(-50%, -50%, 0) translateY(calc(var(--h)*0.5)) rotateX(-90deg); }
 
         /* --- 展開模式 --- */
-        .dimmed { opacity: 0.05; border-style: dashed; pointer-events: none; }
+        /* 關鍵修正: 將 opacity 改為 0，完全隱藏不相關的面 */
+        .dimmed { opacity: 0; pointer-events: none; }
+        
         .line-show { opacity: 1; }
 
-        /* 關鍵修正: 調整 Mode 1 的位置，使其垂直置中，避免撞到標題 */
+        /* Mode 1: 前 + 上 */
         .mode-1 .f-top { transform: translate(-50%, -50%); }
         .mode-1 .f-front { transform: translate(-50%, calc(-50% + 150px)); }
 
+        /* Mode 2: 右 + 上 */
         .mode-2 .f-top { transform: translate(calc(-50% - 25px), -50%); }
         .mode-2 .f-right { transform: translate(calc(-50% + 75px), -50%) rotateZ(-90deg); }
         .mode-2 .f-right .pt-f { transform: rotateZ(90deg) translateZ(3px); }
+        
+        /* Mode 3: 右 + 後 */
         .mode-3 .f-right { transform: translate(-100%, -50%); }
         .mode-3 .f-back { transform: translate(0%, -50%) rotateY(0deg); }
 
@@ -222,10 +227,8 @@
             fRightInitial.style.display = 'flex'; fRightInitial.style.bottom = '-12px'; fRightInitial.style.left = '-12px';
             updateMath("蜜蜂飛行最短路徑：\\(\\sqrt{1^2 + 3^2 + 5^2} = \\sqrt{35}\\)");
             
-            // 修正滑鼠與觸控邏輯，防止在滑動頁面時誤觸旋轉
             document.onmousemove = (e) => {
                 if(currentMode !== 0) return;
-                // 只有在電腦版寬螢幕時啟用跟隨滑鼠，手機版避免干擾
                 if(window.innerWidth > 768) {
                     const x = (window.innerWidth/2 - e.clientX)/25;
                     const y = (window.innerHeight/2 - e.clientY)/25;
@@ -237,7 +240,7 @@
 
         function setMode(mode) {
             currentMode = mode;
-            document.onmousemove = null; // 停止跟隨滑鼠
+            document.onmousemove = null; 
             resetView(); 
             
             setTimeout(() => {
