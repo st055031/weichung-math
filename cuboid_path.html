@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>長方體最短路徑 (最終完美修正版_V10)</title>
+    <title>長方體最短路徑 (最終完美修正版_V12_完美直線)</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -31,12 +31,12 @@
             margin: 0; min-height: 100vh; overflow: hidden;
         }
 
-        /* --- 修正：回首頁按鈕樣式 (使用 fixed 強制固定) --- */
+        /* --- 新增：回首頁懸浮按鈕 (使用 fixed 強制固定) --- */
         .home-btn {
-            position: fixed; /* 改用 fixed，無視父層排版 */
+            position: fixed; /* 強制固定在視窗左上角，不受 flex 影響 */
             top: 20px;
             left: 20px;
-            background: #2e7d32; /* 改為深綠色底，確保顯眼 */
+            background: #2e7d32; /* 深綠色底 */
             color: white;
             text-decoration: none;
             padding: 12px 20px;
@@ -46,7 +46,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            z-index: 99999; /* 最高層級 */
+            z-index: 99999; /* 確保在最上層 */
             transition: 0.3s;
             border: 2px solid white;
         }
@@ -54,9 +54,6 @@
             background: #1b5e20;
             transform: scale(1.05);
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-        }
-        .home-btn i {
-            font-size: 1.1em;
         }
 
         h1 { margin-top: 15px; margin-bottom: 20px; color: #2d3748; }
@@ -133,9 +130,10 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             font-family: Arial, sans-serif;
             transition: transform 1.2s;
-            /* 最高層級設定 */
             z-index: 9999; 
-            transform: translateZ(35px); 
+            transform-style: preserve-3d;
+            /* 微小位移以附著在線條上 */
+            transform: translateZ(3px); 
         }
 
         /* --- 3D 初始位置 --- */
@@ -174,16 +172,13 @@
 
         /* Mode 2: Top + Right */
         .mode-2 .f-top {
-            /* 左移，讓接縫處位於中心 */
             transform: translate(calc(-50% - 25px), -50%);
         }
         .mode-2 .f-right {
-            /* 旋轉 -90 度並平移，使其接在 Top 右側 */
             transform: translate(calc(-50% + 75px), -50%) rotateZ(-90deg);
         }
-        /* 修正文字方向與層級 */
         .mode-2 .f-right .pt-f {
-            transform: rotateZ(90deg) translateZ(35px); 
+            transform: rotateZ(90deg) translateZ(3px); 
         }
 
         /* Mode 3: Right + Back */
@@ -353,13 +348,15 @@
                 else if (mode === 2) {
                     // Path 2: Top + Right
                     keep = ['f-top', 'f-right'];
-                    drawLine('f-top', 0, 0, 150, 187.5);
                     
-                    // 修正核心：旋轉後座標系下的直線
-                    // 從 (62.5, 0) 連到 (0, 50)
-                    drawLine('f-right', 62.5, 0, 0, 50);
+                    // 修正核心：使用單一線條跨越兩個平面，確保完美直線
+                    // 起點 D (0,0) 在 Top 面
+                    // 終點 F 在展開後的全局座標為 (總寬 150+50, 總高 250) = (200, 250)
+                    // 利用 SVG overflow: visible 特性，直接在 Top 面畫出完整線條
+                    drawLine('f-top', 0, 0, 200, 250);
                     
-                    // F 點位置：修正為 Internal Left-Bottom (旋轉後變為 Visual Right-Bottom)
+                    // 不需要在 f-right 畫線，因為 f-top 的線已經延伸過去了
+                    
                     showPoint('f-right', 'bottom:-12px; left:-12px;'); 
                     
                     mStr = "<span style='color:#e53e3e'>★ 螞蟻路徑二 (最短) ★</span>：\\(\\sqrt{(3+1)^2 + 5^2} = \\sqrt{41}\\)";
