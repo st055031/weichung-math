@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>長方體最短路徑 (手機優化版_V13)</title>
+    <title>長方體最短路徑 (手機優化版_V14)</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -28,10 +28,8 @@
             display: flex; flex-direction: column; align-items: center;
             margin: 0; 
             min-height: 100vh; 
-            /* 關鍵修正 1: 開啟垂直捲動，關閉水平捲動 */
             overflow-y: auto; 
             overflow-x: hidden;
-            /* 增加底部空間，避免手機下方導航列擋住內容 */
             padding-bottom: 50px; 
             -webkit-tap-highlight-color: transparent;
         }
@@ -55,15 +53,14 @@
         }
         .home-btn:hover { background: #1b5e20; transform: scale(1.05); }
 
-        h1 { margin-top: 20px; margin-bottom: 10px; color: #2d3748; text-align: center; font-size: 1.5rem; padding-left: 100px; /* 避開回首頁按鈕 */ }
+        h1 { margin-top: 20px; margin-bottom: 10px; color: #2d3748; text-align: center; font-size: 1.5rem; padding-left: 100px; }
 
         .scene {
-            width: 100%; /* 改為響應式寬度 */
+            width: 100%;
             max-width: 800px;
-            height: 400px; /* 稍微縮小預設高度 */
+            height: 400px;
             perspective: 1200px;
             display: flex; justify-content: center; align-items: center;
-            /* 讓手機滑動時不會意外觸發旋轉，需點擊空白處才能滑動頁面 */
             touch-action: pan-y; 
             margin-bottom: 10px;
         }
@@ -76,22 +73,14 @@
             width: 0; height: 0;
         }
 
-        /* 手機版縮放控制 */
         @media screen and (max-width: 600px) {
             h1 { font-size: 1.2rem; padding-left: 120px; margin-top: 15px; }
-            
-            /* 關鍵修正 2: 手機上強制縮小 3D 模型 (0.6倍) */
             .box { zoom: 0.6; } 
-            
-            .scene { height: 320px; } /* 減少高度佔用 */
-            
-            /* 關鍵修正 3: 按鈕變成直排，方便點擊 */
+            .scene { height: 320px; } 
             .controls { grid-template-columns: 1fr !important; width: 85% !important; gap: 10px !important; }
-            
             .btn { padding: 12px; }
             .btn h3 { font-size: 1rem; }
             .btn p { font-size: 0.85rem; }
-            
             .info-card { width: 80%; text-align: center; font-size: 1rem; padding: 10px 20px; }
         }
 
@@ -142,8 +131,11 @@
         /* --- 展開模式 --- */
         .dimmed { opacity: 0.05; border-style: dashed; pointer-events: none; }
         .line-show { opacity: 1; }
-        .mode-1 .f-top { transform: translate(-50%, -100%); }
-        .mode-1 .f-front { transform: translate(-50%, 0%); }
+
+        /* 關鍵修正: 調整 Mode 1 的位置，使其垂直置中，避免撞到標題 */
+        .mode-1 .f-top { transform: translate(-50%, -50%); }
+        .mode-1 .f-front { transform: translate(-50%, calc(-50% + 150px)); }
+
         .mode-2 .f-top { transform: translate(calc(-50% - 25px), -50%); }
         .mode-2 .f-right { transform: translate(calc(-50% + 75px), -50%) rotateZ(-90deg); }
         .mode-2 .f-right .pt-f { transform: rotateZ(90deg) translateZ(3px); }
