@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>長方體最短路徑 (手機觸控旋轉版_V14)</title>
+    <title>長方體最短路徑 (手機優化版_V13)</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -28,62 +28,84 @@
             display: flex; flex-direction: column; align-items: center;
             margin: 0; 
             min-height: 100vh; 
+            /* 關鍵修正 1: 開啟垂直捲動，關閉水平捲動 */
             overflow-y: auto; 
             overflow-x: hidden;
+            /* 增加底部空間，避免手機下方導航列擋住內容 */
             padding-bottom: 50px; 
             -webkit-tap-highlight-color: transparent;
         }
 
         .home-btn {
             position: fixed;
-            top: 15px; left: 15px;
-            background: #2e7d32; color: white;
-            text-decoration: none; padding: 10px 18px; border-radius: 30px;
+            top: 15px;
+            left: 15px;
+            background: #2e7d32;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 30px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            font-weight: bold; display: flex; align-items: center; gap: 8px;
-            z-index: 99999; transition: 0.3s; border: 2px solid white; font-size: 14px;
+            font-weight: bold;
+            display: flex; align-items: center; gap: 8px;
+            z-index: 99999;
+            transition: 0.3s;
+            border: 2px solid white;
+            font-size: 14px;
         }
         .home-btn:hover { background: #1b5e20; transform: scale(1.05); }
 
-        h1 { margin-top: 20px; margin-bottom: 10px; color: #2d3748; text-align: center; font-size: 1.5rem; padding-left: 100px; }
+        h1 { margin-top: 20px; margin-bottom: 10px; color: #2d3748; text-align: center; font-size: 1.5rem; padding-left: 100px; /* 避開回首頁按鈕 */ }
 
         .scene {
-            width: 100%; max-width: 800px;
-            height: 400px;
+            width: 100%; /* 改為響應式寬度 */
+            max-width: 800px;
+            height: 400px; /* 稍微縮小預設高度 */
             perspective: 1200px;
             display: flex; justify-content: center; align-items: center;
+            /* 讓手機滑動時不會意外觸發旋轉，需點擊空白處才能滑動頁面 */
+            touch-action: pan-y; 
             margin-bottom: 10px;
-            /* 關鍵：在場景區域內，觸控操作由 JS 接管，防止瀏覽器預設捲動 */
-            touch-action: none; 
-            cursor: grab;
         }
-        .scene:active { cursor: grabbing; }
 
         .box {
             position: relative;
             transform-style: preserve-3d;
             transform: rotateX(-30deg) rotateY(-45deg);
-            transition: transform 0.1s linear; /* 縮短時間讓拖曳更跟手，但重置時會由 JS 覆蓋為 1.2s */
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
             width: 0; height: 0;
         }
 
+        /* 手機版縮放控制 */
         @media screen and (max-width: 600px) {
             h1 { font-size: 1.2rem; padding-left: 120px; margin-top: 15px; }
+            
+            /* 關鍵修正 2: 手機上強制縮小 3D 模型 (0.6倍) */
             .box { zoom: 0.6; } 
-            .scene { height: 320px; }
+            
+            .scene { height: 320px; } /* 減少高度佔用 */
+            
+            /* 關鍵修正 3: 按鈕變成直排，方便點擊 */
             .controls { grid-template-columns: 1fr !important; width: 85% !important; gap: 10px !important; }
+            
             .btn { padding: 12px; }
+            .btn h3 { font-size: 1rem; }
+            .btn p { font-size: 0.85rem; }
+            
             .info-card { width: 80%; text-align: center; font-size: 1rem; padding: 10px 20px; }
         }
 
         .face {
             position: absolute;
-            background: var(--bg-face); border: 2px solid var(--border-face);
+            background: var(--bg-face);
+            border: 2px solid var(--border-face);
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; color: #2c5282; font-size: 16px;
-            backface-visibility: visible; transform-origin: center;
+            backface-visibility: visible;
+            transform-origin: center;
             transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
-            box-sizing: border-box; transform-style: preserve-3d; 
+            box-sizing: border-box;
+            transform-style: preserve-3d; 
         }
 
         .f-triangle {
@@ -109,7 +131,7 @@
             z-index: 9999; transform-style: preserve-3d; transform: translateZ(3px); 
         }
 
-        /* 3D Positions */
+        /* --- 3D 初始位置 --- */
         .f-top { width: var(--w); height: var(--d); transform: translate3d(-50%, -50%, 0) translateY(calc(var(--h)*-0.5)) rotateX(90deg); }
         .f-front { width: var(--w); height: var(--h); transform: translate3d(-50%, -50%, 0) translateZ(calc(var(--d)*0.5)); }
         .f-right { width: var(--d); height: var(--h); transform: translate3d(-50%, -50%, 0) translateX(calc(var(--w)*0.5)) rotateY(90deg); }
@@ -117,7 +139,7 @@
         .f-left { width: var(--d); height: var(--h); transform: translate3d(-50%, -50%, 0) translateX(calc(var(--w)*-0.5)) rotateY(-90deg); }
         .f-bottom { width: var(--w); height: var(--d); transform: translate3d(-50%, -50%, 0) translateY(calc(var(--h)*0.5)) rotateX(-90deg); }
 
-        /* Modes */
+        /* --- 展開模式 --- */
         .dimmed { opacity: 0.05; border-style: dashed; pointer-events: none; }
         .line-show { opacity: 1; }
         .mode-1 .f-top { transform: translate(-50%, -100%); }
@@ -128,13 +150,15 @@
         .mode-3 .f-right { transform: translate(-100%, -50%); }
         .mode-3 .f-back { transform: translate(0%, -50%) rotateY(0deg); }
 
+        /* UI Controls */
         .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 90%; max-width: 900px; margin-top:10px; }
-        .btn { background: white; border: 1px solid #cbd5e0; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; text-align: left; }
+        .btn { background: white; border: 1px solid #cbd5e0; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; text-align: left; position: relative; overflow: hidden; }
         .btn:hover { border-color: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn h3 { margin: 0 0 5px 0; color: #2b6cb0; font-size: 1rem; }
         .btn p { margin: 0; color: #718096; font-size: 0.9rem; }
         .btn-reset { grid-column: 1 / -1; text-align: center; background: #edf2f7; }
         .info-card { background: white; padding: 10px 40px; border-radius: 50px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 1.1rem; margin-top:10px; margin-bottom: 10px; z-index: 10; position: relative; }
+
     </style>
 </head>
 <body>
@@ -143,7 +167,7 @@
 
     <h1>長方體最短路徑問題</h1>
     
-    <div class="scene" id="scene-area">
+    <div class="scene">
         <div class="box" id="box">
             <div class="face f-top" id="f-top">上 (3x5)<svg><line class="line-segment" id="line-top" /></svg><div class="point" id="pt-d" style="top:-12px; left:-12px;">D</div></div>
             <div class="face f-front" id="f-front">前 (3x1)<svg><line class="line-segment" id="line-front" /></svg><div class="point pt-f" style="bottom:-12px; right:-12px; display:none;">F</div></div>
@@ -173,7 +197,6 @@
 
     <script>
         const box = document.getElementById('box');
-        const sceneArea = document.getElementById('scene-area');
         const faces = {
             top: document.getElementById('f-top'),
             front: document.getElementById('f-front'),
@@ -190,8 +213,6 @@
 
         function resetView() {
             currentMode = 0;
-            // 恢復平滑過渡
-            box.style.transition = "transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)";
             box.style.transform = "rotateX(-30deg) rotateY(-45deg)";
             box.className = "box"; 
             
@@ -208,56 +229,29 @@
             const fRightInitial = faces.right.querySelector('.pt-f');
             fRightInitial.style.display = 'flex'; fRightInitial.style.bottom = '-12px'; fRightInitial.style.left = '-12px';
             updateMath("蜜蜂飛行最短路徑：\\(\\sqrt{1^2 + 3^2 + 5^2} = \\sqrt{35}\\)");
-        }
-        
-        // -----------------------------------------------------------
-        // 互動核心邏輯：區分「觸控方塊」與「滑動頁面」
-        // -----------------------------------------------------------
-        function addInteraction() {
-            // 1. 桌面版滑鼠互動 (監聽整個場景區域)
-            sceneArea.addEventListener('mousemove', (e) => {
+            
+            // 修正滑鼠與觸控邏輯，防止在滑動頁面時誤觸旋轉
+            document.onmousemove = (e) => {
                 if(currentMode !== 0) return;
-                // 電腦版靈敏度較低 (/25)
-                const x = (window.innerWidth/2 - e.clientX)/25;
-                const y = (window.innerHeight/2 - e.clientY)/25;
-                box.style.transition = "transform 0.1s linear"; // 讓跟隨更即時
-                box.style.transform = `rotateX(${-30+y}deg) rotateY(${-45-x}deg)`;
-            });
-
-            // 2. 手機版觸控互動 (只監聽場景區域)
-            sceneArea.addEventListener('touchmove', (e) => {
-                if(currentMode !== 0) return; // 如果已經展開，不允許旋轉
-
-                // ★ 關鍵：阻止預設捲動行為 (只在這個區域內發生)
-                e.preventDefault(); 
-                
-                const touch = e.touches[0];
-                // 手機版靈敏度調高 (/8)，讓手指輕滑就能轉動
-                const sensitivity = window.innerWidth < 600 ? 8 : 25;
-                
-                const x = (window.innerWidth/2 - touch.clientX) / sensitivity;
-                const y = (window.innerHeight/2 - touch.clientY) / sensitivity;
-                
-                box.style.transition = "transform 0s linear"; // 觸控需要極致跟手，無延遲
-                box.style.transform = `rotateX(${-30+y}deg) rotateY(${-45-x}deg)`;
-            }, { passive: false }); // passive: false 允許使用 preventDefault
+                // 只有在電腦版寬螢幕時啟用跟隨滑鼠，手機版避免干擾
+                if(window.innerWidth > 768) {
+                    const x = (window.innerWidth/2 - e.clientX)/25;
+                    const y = (window.innerHeight/2 - e.clientY)/25;
+                    box.style.transform = `rotateX(${-30+y}deg) rotateY(${-45-x}deg)`;
+                }
+            };
         }
-
         resetView();
-        addInteraction(); // 啟動監聽
 
         function setMode(mode) {
             currentMode = mode;
-            // 展開時需要慢速動畫，恢復長過渡時間
-            box.style.transition = "transform 1.2s cubic-bezier(0.4, 0, 0.2, 1)";
+            document.onmousemove = null; // 停止跟隨滑鼠
+            resetView(); 
             
-            // 先重置位置
-            box.style.transform = "rotateX(-30deg) rotateY(-45deg)";
-            
-            // 稍微延遲後執行展開，確保轉正動畫先跑一點點
             setTimeout(() => {
+                currentMode = mode;
                 box.style.transform = "rotateX(0deg) rotateY(0deg)";
-                box.className = "box mode-" + mode;
+                box.classList.add(`mode-${mode}`);
 
                 let keep = [];
                 let mStr = "";
@@ -289,7 +283,7 @@
                     if(f !== faces.triangle && !keep.includes(f.id)) f.classList.add('dimmed');
                 });
                 updateMath(mStr);
-            }, 50); // 縮短延遲讓反應更快
+            }, 600);
         }
 
         function drawLine(faceId, x1, y1, x2, y2) {
