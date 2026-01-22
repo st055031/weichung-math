@@ -138,51 +138,30 @@
 
         footer { background: #333; color: white; text-align: center; padding: 20px; margin-top: 60px; }
 
-/* --- 手機版導覽列優化 --- */
-@media screen and (max-width: 600px) {
-    /* 1. 調整容器內距，爭取空間 */
-    .nav-container {
-        padding: 10px 8px;
-        flex-wrap: nowrap; /* 強制不換行 */
-    }
-
-    /* 2. 縮小 Logo 圖片與文字 */
-    .logo {
-        font-size: 15px;
-        gap: 5px;
-        flex-shrink: 0; /* 防止 Logo 被壓扁 */
-    }
-    .logo img {
-        height: 28px !important; /* 使用 !important 覆蓋 inline style */
-        margin-right: 3px !important;
-    }
-
-    /* 3. 調整連結文字大小與間距 */
-    .nav-links {
-        gap: 5px; 
-    }
-    .nav-links a {
-        font-size: 12px;
-        padding: 4px 6px;
-        white-space: nowrap; /* 關鍵：文字強制不換行 */
-    }
-}
+        /* --- 手機版導覽列優化 --- */
+        @media screen and (max-width: 600px) {
+            .nav-container { padding: 10px 8px; flex-wrap: nowrap; }
+            .logo { font-size: 15px; gap: 5px; flex-shrink: 0; }
+            .logo img { height: 28px !important; margin-right: 3px !important; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 12px; padding: 4px 6px; white-space: nowrap; }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="nav-container">
-           <a href="#" class="logo">
-    <img src="logo.jpg" alt="韋中老師" style="height: 45px; border-radius: 10px; margin-right: 5px;">
-    韋中數學
-</a>
-           <nav class="nav-links">
-    <a href="#menu" style="text-decoration:none; color:#333; font-weight:bold;">教具目錄</a>
-    <a href="#videos" style="text-decoration:none; color:#333; font-weight:bold;">段考題講解影片</a>
-    <a href="about.html" style="text-decoration:none; color:#333; font-weight:bold;">誰是韋中</a>
-    <a href="stories.html" style="text-decoration:none; color:#333; font-weight:bold;">溫馨故事館</a>
-</nav>
+            <a href="#" class="logo">
+                <img src="logo.jpg" alt="韋中老師" style="height: 45px; border-radius: 10px; margin-right: 5px;">
+                韋中數學
+            </a>
+            <nav class="nav-links">
+                <a href="#menu" style="text-decoration:none; color:#333; font-weight:bold;">教具目錄</a>
+                <a href="#videos" style="text-decoration:none; color:#333; font-weight:bold;">段考題講解影片</a>
+                <a href="about.html" style="text-decoration:none; color:#333; font-weight:bold;">誰是韋中</a>
+                <a href="stories.html" style="text-decoration:none; color:#333; font-weight:bold;">溫馨故事館</a>
+            </nav>
         </div>
     </header>
 
@@ -203,17 +182,26 @@
         <div id="menu" style="margin-top: 60px;">
             <h2 class="section-title">互動教具圖書館</h2>
             <div class="tools-grid">
-               <a href="math_tool/index.html" target="_blank" class="tool-nav-card">
-    <div class="tool-icon"><i class="fas fa-calculator"></i></div>
-    <h3>二次函數配方法演示</h3>
-    <p>動態演示配方過程與圖形意義。</p>
-    <span class="tool-badge">新功能</span>
-</a>
+                <a href="cuboid_path.html" target="_blank" class="tool-nav-card">
+                    <div class="tool-icon"><i class="fas fa-cube"></i></div>
+                    <h3>長方體路徑問題</h3>
+                    <p>3D 展開圖模擬與最短路徑計算。</p>
+                    <span class="tool-badge">新功能</span>
+                </a>
+
+                <a href="completing_square.html" target="_blank" class="tool-nav-card">
+                    <div class="tool-icon"><i class="fas fa-calculator"></i></div>
+                    <h3>二次函數配方法演示</h3>
+                    <p>動態演示配方過程與圖形意義。</p>
+                    <span class="tool-badge">新功能</span>
+                </a>
+
                 <a href="#quadratic-tool" class="tool-nav-card">
                     <div class="tool-icon"><i class="fas fa-chart-line"></i></div>
                     <h3>二次函數</h3>
                     <p>標準式係數與拋物線圖形變化。</p>
                 </a>
+                
                 <a href="#cubic-tool" class="tool-nav-card">
                     <div class="tool-icon"><i class="fas fa-wave-square"></i></div>
                     <h3>三次函數</h3>
@@ -232,8 +220,8 @@
                 <p>韋中老師精心錄製的新化高中段考題講解，隨時隨地都能複習段考重點。</p>
                 <br>
                 <a href="https://www.youtube.com/@%E8%91%89%E5%A3%AB%E9%80%A2-b7g/playlists" target="_blank" class="btn" style="background: #cc0000;">
-    <i class="fab fa-youtube"></i> 前往 YouTube 頻道
-</a>
+                    <i class="fab fa-youtube"></i> 前往 YouTube 頻道
+                </a>
             </div>
         </div>
 

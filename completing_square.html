@@ -14,7 +14,33 @@
     <style>
         :root { --primary: #2e7d32; --secondary: #e67e22; --bg: #f4f7f6; --text: #333; }
         body { font-family: 'Noto Sans TC', sans-serif; margin: 0; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .main-layout { display: flex; flex: 1; height: 100%; }
+        
+        /* --- 新增：回首頁懸浮按鈕 (與長方體頁面一致) --- */
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 99999;
+            transition: 0.3s;
+            border: 2px solid white;
+        }
+        .home-btn:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        .main-layout { display: flex; flex: 1; height: 100%; margin-top: 60px; /* 增加頂部間距避開按鈕 */ }
         .canvas-area { flex: 2; background: white; display: flex; flex-direction: column; align-items: center; padding: 20px; border-right: 1px solid #ddd; overflow-y: auto; }
         .controls-area { flex: 1; background: #fafafa; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; min-width: 300px; box-shadow: -5px 0 15px rgba(0,0,0,0.05); }
         .input-group { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; }
@@ -26,10 +52,18 @@
         button:disabled { background-color: #ccc; cursor: not-allowed; }
         #canvas-wrapper { width: 100%; display: flex; justify-content: center; margin-bottom: 20px; }
         .explanation-box { margin-top: auto; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid var(--primary); font-size: 0.9em; width: 90%; }
-        @media (max-width: 768px) { .main-layout { flex-direction: column-reverse; } .canvas-area { border-right: none; border-top: 1px solid #ddd; } }
+        @media (max-width: 768px) { 
+            .main-layout { flex-direction: column-reverse; margin-top: 60px; } 
+            .canvas-area { border-right: none; border-top: 1px solid #ddd; } 
+            .home-btn { padding: 8px 15px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
+
+    <a href="index.html" class="home-btn">
+        <i class="fas fa-home"></i> 回首頁
+    </a>
 
     <div class="main-layout">
         <div class="canvas-area">
@@ -76,50 +110,44 @@
             let strC = document.getElementById('input_c').value || "0";
             try {
                 rawA = strA; rawB = strB; rawC = strC;
-                // 使用 expand() 確保結構展開
                 raw_B_div_A = nerdamer(`(${strB})/(${strA})`).expand().text();
                 raw_Half = nerdamer(`(${raw_B_div_A})/2`).expand().text();
                 raw_Half_Sq = nerdamer(`(${raw_Half})^2`).expand().text();
-                
-                // 平衡項 (計算其負值以便顯示)
                 let balance = nerdamer(`(${strA}) * (${raw_Half_Sq})`).expand().text();
                 raw_Balance = nerdamer(`-1 * (${balance})`).expand().text(); 
-                
                 raw_K = nerdamer(`(${strC}) - (${balance})`).expand().text();
                 redraw();
             } catch (e) { console.log(e); }
         }
 
-        // --- 核心：使用 Nerdamer 引擎解析分子分母 ---
-        // 這是解決負指數與分數顯示的最強方案
+        function decimalToFraction(num) {
+            if (Number.isInteger(num)) return { n: num, d: 1 };
+            let gcd = (a, b) => b ? gcd(b, a % b) : a;
+            let len = num.toString().length - 2;
+            let denominator = Math.pow(10, len);
+            let numerator = num * denominator;
+            let divisor = gcd(numerator, denominator);
+            return { n: numerator / divisor, d: denominator / divisor };
+        }
+
         function formatMonomial(str) {
             try {
-                // 1. 建立 Nerdamer 物件
                 let term = nerdamer(str);
-                
-                // 2. 直接獲取分子與分母 (強制轉為分數格式)
-                // text('fractions') 會把 0.25 轉成 1/4，把 a^-1 轉成 1/a
                 let num = term.numerator().text('fractions');
                 let den = term.denominator().text('fractions');
-                
-                // 3. 回傳結果
                 return {
                     num: num,
                     den: den,
-                    isFraction: den !== '1' // 如果分母不是 1，就是分數
+                    isFraction: den !== '1'
                 };
             } catch (e) {
                 return { num: str, den: '1', isFraction: false };
             }
         }
 
-        // --- 繪圖：多項式字串 (處理 ^ 上標與 * 隱藏) ---
         function drawPoly(str, x, y, size, measureOnly = false) {
             let cursorX = x;
-            // 移除乘號
             let displayStr = str.replace(/\*/g, '');
-            
-            // 清理多餘外層括號
             if (displayStr.length > 2 && displayStr.startsWith('(') && displayStr.endsWith(')')) {
                  let d = 0, ok = true;
                  for(let i=0; i<displayStr.length-1; i++){
@@ -135,13 +163,11 @@
             for (let i = 0; i < displayStr.length; i++) {
                 let char = displayStr[i];
                 if (char === '^') {
-                    // 上標處理
                     let nextChar = displayStr[i+1];
                     let superscript = nextChar;
                     let skip = 1;
                     if (i+1 < displayStr.length) {
                         let sub = displayStr.substring(i+1);
-                        // 匹配整數或負整數
                         let m = sub.match(/^(-?\d+)/);
                         if (m) { superscript = m[1]; skip = m[0].length; }
                         else if (nextChar === '(') {
@@ -157,7 +183,6 @@
                     cursorX += textWidth(superscript) * 0.75;
                     i += skip;
                 } else if (char === '+' || char === '-') {
-                    // 運算符號加點間距
                     let w = textWidth(char);
                     if (!measureOnly) text(char, cursorX + 2, y);
                     cursorX += w + 6;
@@ -170,31 +195,21 @@
             return cursorX - x;
         }
 
-        // --- 繪圖：智能數學項 (自動拆解多項式並垂直顯示) ---
         function drawSmartTerm(rawStr, x, y, options = {}) {
             let { showSign = false, color = 0, fontSize = 24, measureOnly = false } = options;
             if (!measureOnly) { fill(color); stroke(0); strokeWeight(0); textSize(fontSize); }
             else textSize(fontSize);
 
             let cursorX = x;
-
-            // 1. 拆解多項式 (依據 + 或 - 分割)
             let cleanRaw = rawStr.replace(/\s/g, ''); 
-            // 修正：保留乘號，確保 nerdamer 解析正確
-            
             let tempStr = cleanRaw;
             if (tempStr.startsWith('-')) tempStr = tempStr.substring(1); 
-            
-            // 簡易分割：除了括號內的 +/-，其他都分割
             let terms = tempStr.replace(/([^+])([+-])/g, '$1@$2').split('@');
-            
             if (cleanRaw.startsWith('-')) terms[0] = '-' + terms[0];
 
             terms.forEach((term, index) => {
                 let isNeg = term.startsWith('-');
                 let absTerm = isNeg ? term.substring(1) : (term.startsWith('+') ? term.substring(1) : term);
-                
-                // 決定符號
                 let signToDraw = "";
                 if (index === 0) {
                     if (isNeg) signToDraw = "- ";
@@ -209,16 +224,12 @@
                     cursorX += sw;
                 }
 
-                // 2. 格式化 (Nerdamer 核心)
-                // 這裡傳入的 term 可能含有 *，這是好事！
                 let fmt = formatMonomial(absTerm);
                 
                 if (!fmt.isFraction) {
-                    // 整式
                     let w = drawPoly(fmt.num, cursorX, y, fontSize, measureOnly);
                     cursorX += w;
                 } else {
-                    // 分數
                     let wN = drawPoly(fmt.num, 0, 0, fontSize*0.85, true);
                     let wD = drawPoly(fmt.den, 0, 0, fontSize*0.85, true);
                     let maxW = Math.max(wN, wD) + 10;
@@ -226,12 +237,10 @@
                     if (!measureOnly) {
                         let midY = y - fontSize * 0.4;
                         stroke(color === 0 ? 0 : color); strokeWeight(1.5);
-                        line(cursorX, midY, cursorX + maxW, midY); // 分數線
+                        line(cursorX, midY, cursorX + maxW, midY); 
                         noStroke();
-                        
                         let nx = cursorX + (maxW - wN)/2;
                         drawPoly(fmt.num, nx, midY - 6, fontSize*0.85, false);
-                        
                         let dx = cursorX + (maxW - wD)/2;
                         drawPoly(fmt.den, dx, midY + fontSize*0.85 + 4, fontSize*0.85, false);
                         textSize(fontSize);
@@ -239,17 +248,15 @@
                     cursorX += maxW;
                 }
             });
-
             return { width: cursorX - x, centerX: x + (cursorX - x)/2 };
         }
 
         function draw() {
             background(255);
             fill(50); stroke(0); strokeWeight(0.5); textSize(24);
-            
             let startX = 20; let startY = 80; let lh = 150; let p = 10; 
 
-            // Line 1: y = ax^2 + bx + c
+            // Line 1
             let cx = startX;
             text("y = ", cx, startY); cx += textWidth("y = ") + p;
             if (rawA !== "1") cx += drawSmartTerm(rawA, cx, startY).width + p;
@@ -266,7 +273,6 @@
                 let arrowStartA = posA.centerX; 
                 text("( ", cx, y2); cx += textWidth("( ");
                 cx += drawPoly("x^2", cx, y2, 24, false) + p;
-                
                 let posBdivA = drawSmartTerm(raw_B_div_A, cx, y2, {showSign: true});
                 cx += posBdivA.width + p;
                 let arrowStartB = posBdivA.centerX;
@@ -284,10 +290,8 @@
                     let x_centered = gapStart + (gapW - sqWidth) / 2;
                     let posSq = drawSmartTerm(raw_Half_Sq, x_centered, y2, {showSign: true, color: 'blue'});
                     let arrowEndSq = posSq.centerX;
-
                     let posBal = drawSmartTerm(raw_Balance, endOfLine2 + 20, y2, {showSign: true, color: 'blue'});
                     let arrowEndBal = posBal.centerX;
-
                     drawCurvedArrow(arrowStartB, y2 + 15, arrowEndSq, y2 + 15, "red");
                     drawOverArrow(arrowStartA, y2 - 50, arrowEndBal, y2 - 50);
                 }

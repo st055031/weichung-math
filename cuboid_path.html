@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長方體最短路徑 (最終完美修正版_V10)</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --u: 50px;
+            /* 題目數據：AB=3(寬), AE=1(高), AD=5(深) */
+            --w: calc(3 * var(--u)); /* 150px */
+            --h: calc(1 * var(--u)); /* 50px */
+            --d: calc(5 * var(--u)); /* 250px */
+            
+            --bg-face: rgba(66, 153, 225, 0.2);
+            --border-face: #3182ce;
+            --color-line: #e53e3e;
+            --color-pt: #e53e3e;
+            /* 蜜蜂路徑顏色 */
+            --color-bee-fill: rgba(229, 62, 62, 0.3);
+            --color-fd-line: #e53e3e;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background-color: #f7fafc;
+            display: flex; flex-direction: column; align-items: center;
+            margin: 0; min-height: 100vh; overflow: hidden;
+        }
+
+        /* --- 修正：回首頁按鈕樣式 (使用 fixed 強制固定) --- */
+        .home-btn {
+            position: fixed; /* 改用 fixed，無視父層排版 */
+            top: 20px;
+            left: 20px;
+            background: #2e7d32; /* 改為深綠色底，確保顯眼 */
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 99999; /* 最高層級 */
+            transition: 0.3s;
+            border: 2px solid white;
+        }
+        .home-btn:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        .home-btn i {
+            font-size: 1.1em;
+        }
+
+        h1 { margin-top: 15px; margin-bottom: 20px; color: #2d3748; }
+
+        .scene {
+            width: 800px; height: 500px;
+            perspective: 1200px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .box {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(-30deg) rotateY(-45deg);
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0; height: 0;
+        }
+
+        .face {
+            position: absolute;
+            background: var(--bg-face);
+            border: 2px solid var(--border-face);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #2c5282; font-size: 16px;
+            backface-visibility: visible;
+            transform-origin: center;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            box-sizing: border-box;
+            transform-style: preserve-3d; 
+        }
+
+        /* 蜜蜂路徑的直角三角形切面 */
+        .f-triangle {
+            width: 291.55px; 
+            height: var(--h); 
+            /* 繞Y軸旋轉以連接 Back-Left(D) 和 Front-Right(F) */
+            transform: translate3d(-50%, -50%, 0) rotateY(-59.04deg);
+            background: none; 
+            border: none; 
+            pointer-events: none; 
+            opacity: 1;
+        }
+        
+        .box[class*="mode-"] .f-triangle {
+            opacity: 0;
+        }
+
+        .triangle-shape {
+            fill: var(--color-bee-fill);
+            stroke: none;
+        }
+        .fd-line {
+            stroke: var(--color-fd-line);
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        .face svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; overflow: visible;
+            z-index: 1;
+        }
+        
+        .line-segment {
+            stroke: var(--color-line); stroke-width: 4; stroke-linecap: round;
+            opacity: 0; transition: opacity 0.5s 0.6s;
+        }
+
+        .point {
+            position: absolute; width: 24px; height: 24px;
+            background: var(--color-pt); color: white; border-radius: 50%;
+            border: 2px solid white; 
+            font-size: 14px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            transition: transform 1.2s;
+            /* 最高層級設定 */
+            z-index: 9999; 
+            transform: translateZ(35px); 
+        }
+
+        /* --- 3D 初始位置 --- */
+        .f-top {
+            width: var(--w); height: var(--d);
+            transform: translate3d(-50%, -50%, 0) translateY(calc(var(--h)*-0.5)) rotateX(90deg);
+        }
+        .f-front {
+            width: var(--w); height: var(--h);
+            transform: translate3d(-50%, -50%, 0) translateZ(calc(var(--d)*0.5));
+        }
+        .f-right {
+            width: var(--d); height: var(--h);
+            transform: translate3d(-50%, -50%, 0) translateX(calc(var(--w)*0.5)) rotateY(90deg);
+        }
+        .f-back {
+            width: var(--w); height: var(--h);
+            transform: translate3d(-50%, -50%, 0) translateZ(calc(var(--d)*-0.5)) rotateY(180deg);
+        }
+        .f-left {
+            width: var(--d); height: var(--h);
+            transform: translate3d(-50%, -50%, 0) translateX(calc(var(--w)*-0.5)) rotateY(-90deg);
+        }
+        .f-bottom {
+            width: var(--w); height: var(--d);
+            transform: translate3d(-50%, -50%, 0) translateY(calc(var(--h)*0.5)) rotateX(-90deg);
+        }
+
+        /* --- 展開模式 --- */
+        .dimmed { opacity: 0.05; border-style: dashed; pointer-events: none; }
+        .line-show { opacity: 1; }
+
+        /* Mode 1: Top + Front */
+        .mode-1 .f-top { transform: translate(-50%, -100%); }
+        .mode-1 .f-front { transform: translate(-50%, 0%); }
+
+        /* Mode 2: Top + Right */
+        .mode-2 .f-top {
+            /* 左移，讓接縫處位於中心 */
+            transform: translate(calc(-50% - 25px), -50%);
+        }
+        .mode-2 .f-right {
+            /* 旋轉 -90 度並平移，使其接在 Top 右側 */
+            transform: translate(calc(-50% + 75px), -50%) rotateZ(-90deg);
+        }
+        /* 修正文字方向與層級 */
+        .mode-2 .f-right .pt-f {
+            transform: rotateZ(90deg) translateZ(35px); 
+        }
+
+        /* Mode 3: Right + Back */
+        .mode-3 .f-right {
+            transform: translate(-100%, -50%);
+        }
+        .mode-3 .f-back {
+            transform: translate(0%, -50%) rotateY(0deg);
+        }
+
+        /* UI */
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 90%; max-width: 900px; margin-top:20px; }
+        .btn { background: white; border: 1px solid #cbd5e0; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; text-align: left; }
+        .btn:hover { border-color: #3182ce; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn h3 { margin: 0 0 5px 0; color: #2b6cb0; font-size: 1rem; }
+        .btn p { margin: 0; color: #718096; font-size: 0.9rem; }
+        .btn-reset { grid-column: 1 / -1; text-align: center; background: #edf2f7; }
+        .info-card { background: white; padding: 10px 40px; border-radius: 50px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 1.1rem; margin-top:10px; }
+
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="home-btn">
+        <i class="fas fa-home"></i> 回首頁
+    </a>
+
+    <h1>長方體最短路徑問題</h1>
+    
+    <div class="scene">
+        <div class="box" id="box">
+            
+            <div class="face f-top" id="f-top">
+                上 (3x5)
+                <svg><line class="line-segment" id="line-top" /></svg>
+                <div class="point" id="pt-d" style="top:-12px; left:-12px;">D</div>
+            </div>
+
+            <div class="face f-front" id="f-front">
+                前 (3x1)
+                <svg><line class="line-segment" id="line-front" /></svg>
+                <div class="point pt-f" style="bottom:-12px; right:-12px; display:none;">F</div>
+            </div>
+
+            <div class="face f-right" id="f-right">
+                右 (5x1)
+                <svg><line class="line-segment" id="line-right" /></svg>
+                <div class="point pt-f" style="bottom:-12px; left:-12px;">F</div>
+            </div>
+
+            <div class="face f-back" id="f-back">
+                後 (3x1)
+                <svg><line class="line-segment" id="line-back" /></svg>
+                <div class="point pt-d-back" style="top:-12px; right:-12px; display:none;">D</div>
+            </div>
+
+            <div class="face f-left" id="f-left">左</div>
+            <div class="face f-bottom" id="f-bottom">下 (3x5)</div>
+
+            <div class="face f-triangle">
+                <svg viewBox="0 0 291.55 50" preserveAspectRatio="none">
+                    <polygon points="0,0 0,50 291.55,50" class="triangle-shape" />
+                    <line x1="0" y1="0" x2="291.55" y2="50" class="fd-line" />
+                </svg>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="info-card" id="math-out">
+        蜜蜂飛行最短路徑：\(\sqrt{1^2 + 3^2 + 5^2} = \sqrt{35}\)
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="setMode(1)">
+            <h3>螞蟻路徑一 (展開前+上)</h3>
+            <p>跨越寬邊 AB=3</p>
+        </button>
+        <button class="btn" onclick="setMode(2)">
+            <h3>螞蟻路徑二 (展開右+上)</h3>
+            <p>跨越長邊 AD=5 (最短)</p>
+        </button>
+        <button class="btn" onclick="setMode(3)">
+            <h3>螞蟻路徑三 (展開右+後)</h3>
+            <p>跨越高邊 AE=1</p>
+        </button>
+        <button class="btn btn-reset" onclick="resetView()">
+            <h3>重置 (回到 3D 視圖)</h3>
+        </button>
+    </div>
+
+    <script>
+        const box = document.getElementById('box');
+        const faces = {
+            top: document.getElementById('f-top'),
+            front: document.getElementById('f-front'),
+            right: document.getElementById('f-right'),
+            back: document.getElementById('f-back'),
+            left: document.getElementById('f-left'),
+            bottom: document.getElementById('f-bottom'),
+            triangle: document.querySelector('.f-triangle')
+        };
+        const mathOut = document.getElementById('math-out');
+        const ptD = document.getElementById('pt-d');
+        const ptDBack = faces.back.querySelector('.pt-d-back');
+        let currentMode = 0;
+
+        function resetView() {
+            currentMode = 0;
+            box.style.transform = "rotateX(-30deg) rotateY(-45deg)";
+            box.className = "box"; 
+            
+            // 重置
+            Object.values(faces).forEach(f => {
+                f.classList.remove('dimmed');
+                const line = f.querySelector('.line-segment');
+                if(line) line.classList.remove('line-show');
+                const pts = f.querySelectorAll('.pt-f');
+                pts.forEach(p => {
+                    p.style.display = 'none';
+                    p.style.transform = ''; 
+                });
+            });
+            
+            ptD.style.display = 'flex';
+            ptDBack.style.display = 'none';
+
+            const fRightInitial = faces.right.querySelector('.pt-f');
+            fRightInitial.style.display = 'flex';
+            fRightInitial.style.bottom = '-12px';
+            fRightInitial.style.left = '-12px';
+            
+            updateMath("蜜蜂飛行最短路徑：\\(\\sqrt{1^2 + 3^2 + 5^2} = \\sqrt{35}\\)");
+            
+            document.onmousemove = (e) => {
+                if(currentMode !== 0) return;
+                const x = (window.innerWidth/2 - e.clientX)/25;
+                const y = (window.innerHeight/2 - e.clientY)/25;
+                box.style.transform = `rotateX(${-30+y}deg) rotateY(${-45-x}deg)`;
+            };
+        }
+        resetView();
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.onmousemove = null;
+            resetView(); 
+            
+            setTimeout(() => {
+                currentMode = mode;
+                box.style.transform = "rotateX(0deg) rotateY(0deg)";
+                box.classList.add(`mode-${mode}`);
+
+                let keep = [];
+                let mStr = "";
+                
+                faces.right.querySelector('.pt-f').style.display = 'none'; 
+
+                if (mode === 1) {
+                    // Path 1: Top + Front
+                    keep = ['f-top', 'f-front'];
+                    drawLine('f-top', 0, 0, 125, 250); 
+                    drawLine('f-front', 125, 0, 150, 50);
+                    showPoint('f-front', 'bottom:-12px; right:-12px;'); 
+                    mStr = "螞蟻路徑一：\\(\\sqrt{(5+1)^2 + 3^2} = \\sqrt{45}\\)";
+                } 
+                else if (mode === 2) {
+                    // Path 2: Top + Right
+                    keep = ['f-top', 'f-right'];
+                    drawLine('f-top', 0, 0, 150, 187.5);
+                    
+                    // 修正核心：旋轉後座標系下的直線
+                    // 從 (62.5, 0) 連到 (0, 50)
+                    drawLine('f-right', 62.5, 0, 0, 50);
+                    
+                    // F 點位置：修正為 Internal Left-Bottom (旋轉後變為 Visual Right-Bottom)
+                    showPoint('f-right', 'bottom:-12px; left:-12px;'); 
+                    
+                    mStr = "<span style='color:#e53e3e'>★ 螞蟻路徑二 (最短) ★</span>：\\(\\sqrt{(3+1)^2 + 5^2} = \\sqrt{41}\\)";
+                }
+                else if (mode === 3) {
+                    // Path 3: Right + Back
+                    keep = ['f-right', 'f-back'];
+                    ptD.style.display = 'none';
+                    ptDBack.style.display = 'flex';
+
+                    showPoint('f-right', 'bottom:-12px; left:-12px;');
+                    
+                    // 縮短終點以避開 D 點
+                    drawLine('f-right', 0, 50, 250, 18.75);
+                    drawLine('f-back', 0, 18.75, 134, 2); 
+                    
+                    mStr = "螞蟻路徑三：\\(\\sqrt{(5+3)^2 + 1^2} = \\sqrt{65}\\)";
+                }
+
+                Object.values(faces).forEach(f => {
+                    if(f !== faces.triangle && !keep.includes(f.id)) {
+                        f.classList.add('dimmed');
+                    }
+                });
+                
+                updateMath(mStr);
+
+            }, 600);
+        }
+
+        function drawLine(faceId, x1, y1, x2, y2) {
+            const f = document.getElementById(faceId);
+            const line = f.querySelector('.line-segment');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.classList.add('line-show');
+        }
+
+        function showPoint(faceId, cssStyle) {
+            const f = document.getElementById(faceId);
+            const pt = f.querySelector('.pt-f');
+            if(pt) {
+                const styles = cssStyle.split(';');
+                styles.forEach(s => {
+                    if(s.trim()) {
+                        const [prop, val] = s.split(':');
+                        pt.style[prop.trim()] = val.trim();
+                    }
+                });
+                pt.style.display = 'flex';
+            }
+        }
+        
+        function updateMath(tex) {
+            mathOut.innerHTML = tex;
+            if(window.MathJax) MathJax.typesetPromise();
+        }
+    </script>
+</body>
+</html>
