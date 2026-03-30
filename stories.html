@@ -55,7 +55,7 @@
         .carousel-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             aspect-ratio: 16/9; /* 保持長寬比 */
             background: var(--white);
             border-radius: 20px;
@@ -83,8 +83,11 @@
 
         .slide-img {
             flex: 1;
-            background-size: cover;
+            /* 為了完整顯示卡片內容，修改為 contain 不裁切 */
+            background-size: contain; 
+            background-repeat: no-repeat;
             background-position: center;
+            background-color: #fcf1e3; /* 圖片若有留白時的底色 */
             min-width: 50%;
         }
 
@@ -101,7 +104,7 @@
 
         .student-name { font-size: 1.5em; font-weight: bold; color: var(--primary-dark); margin-bottom: 10px; }
         .student-batch { font-size: 0.9em; color: #8D6E63; margin-bottom: 20px; background: #FFE0B2; padding: 4px 10px; border-radius: 15px; }
-        .quote { font-size: 1.1em; line-height: 1.6; color: #5D4037; font-style: italic; }
+        .quote { font-size: 1.1em; line-height: 1.6; color: #5D4037; font-style: normal; }
 
         /* 控制按鈕 */
         .nav-btn {
@@ -125,7 +128,7 @@
 
         /* 手機版響應式 */
         @media (max-width: 768px) {
-            .carousel-container { aspect-ratio: auto; height: 600px; }
+            .carousel-container { aspect-ratio: auto; height: 700px; }
             .slide-content { flex-direction: column; }
             .slide-img { height: 50%; width: 100%; }
             .slide-text { height: 50%; padding: 20px; }
@@ -148,35 +151,98 @@
             <button class="nav-btn prev" onclick="moveSlide(-1)"><i class="fas fa-chevron-left"></i></button>
             <button class="nav-btn next" onclick="moveSlide(1)"><i class="fas fa-chevron-right"></i></button>
 
+            <!-- 故事 1 -->
             <div class="slide active">
                 <div class="slide-content">
-                    <div class="slide-img" style="background-image: url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1000');"></div>
+                    <div class="slide-img" style="background-image: url('002.jpg');"></div>
                     <div class="slide-text">
-                        <div class="student-batch">112級畢業生</div>
+                        <div class="student-batch">驚人蛻變</div>
                         <div class="student-name">陳小婷</div>
-                        <div class="quote">「老師，謝謝您從國一開始的教導，原本我對數學很排斥，但您的圖解法真的讓我看懂了那些公式的意義！」</div>
+                        <div class="quote">國一36分，最後會考達到A++！</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 故事 2 -->
             <div class="slide">
                 <div class="slide-content">
-                    <div class="slide-img" style="background-image: url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1000');"></div>
+                    <div class="slide-img" style="background-image: url('003.jpg');"></div>
                     <div class="slide-text">
-                        <div class="student-batch">110級畢業生</div>
-                        <div class="student-name">林小華 (考取清大)</div>
-                        <div class="quote">「韋中老師的講義整理得非常有條理，特別是考前的重點整理，讓我複習時事半功倍。謝謝老師！」</div>
+                        <div class="student-batch">永不放棄</div>
+                        <div class="student-name">蘇小卉</div>
+                        <div class="quote">差點放棄數學，最後達到史上會考最高分！</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 故事 3 -->
             <div class="slide">
                 <div class="slide-content">
-                    <div class="slide-img" style="background-image: url('https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1000');"></div>
+                    <div class="slide-img" style="background-image: url('004.jpg');"></div>
                     <div class="slide-text">
-                        <div class="student-batch">家長回饋</div>
-                        <div class="student-name">張媽媽</div>
-                        <div class="quote">「這孩子以前數學總是考不及格，來這裡之後找回了自信，這次段考進步了50分，真的很感謝老師的耐心。」</div>
+                        <div class="student-batch">逆轉勝</div>
+                        <div class="student-name">葉小妤</div>
+                        <div class="quote">國一第一次來試聽數學課，居然哭了，原因是因為為什麼其他同學都回答得出來她不會。最後持續上課之後，在國三段考成功拿下了90分！</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事 4 -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-img" style="background-image: url('005.jpg');"></div>
+                    <div class="slide-text">
+                        <div class="student-batch">重拾興趣</div>
+                        <div class="student-name">雷小縈</div>
+                        <div class="quote">國二46分，來試聽數學之後成功在段考拿下來92分，從此對數學產生了興趣。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事 5 -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-img" style="background-image: url('006.jpg');"></div>
+                    <div class="slide-text">
+                        <div class="student-batch">勤奮不懈</div>
+                        <div class="student-name">黃小涵</div>
+                        <div class="quote">每次都留下來問問題到很晚的學生，十分感動。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事 6 -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-img" style="background-image: url('007.jpg');"></div>
+                    <div class="slide-text">
+                        <div class="student-batch">專注自律</div>
+                        <div class="student-name">莊小珊</div>
+                        <div class="quote">在國三將手機登出社群，每天都很認真地念書，平常在上課也十分認真作筆記。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事 7 -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-img" style="background-image: url('008.jpg');"></div>
+                    <div class="slide-text">
+                        <div class="student-batch">雙喜臨門</div>
+                        <div class="student-name">周小瑄 & 鄭小妏</div>
+                        <div class="quote">恭喜考上雄女，難能可貴！</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 故事 8 -->
+            <div class="slide">
+                <div class="slide-content">
+                    <div class="slide-img" style="background-image: url('009.jpg');"></div>
+                    <div class="slide-text">
+                        <div class="student-batch">溫馨點滴</div>
+                        <div class="student-name">張小馨</div>
+                        <div class="quote">上課十分安靜，活潑乖巧的一位女生。</div>
                     </div>
                 </div>
             </div>
